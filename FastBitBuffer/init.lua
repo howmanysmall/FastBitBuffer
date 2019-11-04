@@ -1,7 +1,4 @@
- --[[
-
-==========================================================================
-==									API								 ==
+--[[
 
 Differences from the original:
 	Using metatables instead of a function returning a table.
@@ -11,6 +8,7 @@ Differences from the original:
 	OPTIMIZED!
 	Added a ::Destroy method.
 
+THE API:
 Constructor: BitBuffer.new()
 
 Read/Write pairs for reading data from or writing data to the BitBuffer:
@@ -191,44 +189,34 @@ BitBuffer.__index = BitBuffer
 
 local CHAR_0X10 = string.char(0x10)
 local LOG_10_OF_2 = math.log10(2)
+local DEPRECATED_WARNING = true
 
 local NumberToBase64, Base64ToNumber = {}, {} do
 	local CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-	for Index = 1, #CHARACTERS do
+	for Index = 1, 64 do
 		local Character = string.sub(CHARACTERS, Index, Index)
 		NumberToBase64[Index - 1] = Character
 		Base64ToNumber[Character] = Index - 1
 	end
 end
 
-local NumberToBase128, Base128ToNumber = {}, {} do -- edit
+-- Credit to Defaultio.
+local NumberToBase128, Base128ToNumber = {}, {} do
 	local CHARACTERS = ""
 	for Index = 0, 127 do CHARACTERS = CHARACTERS .. string.char(Index) end
 
-	for Index = 1, #CHARACTERS do
+	for Index = 1, 128 do
 		local Character = string.sub(CHARACTERS, Index, Index)
 		NumberToBase128[Index - 1] = Character
 		Base128ToNumber[Character] = Index - 1
 	end
-end --/edit
+end
 
 local PowerOfTwo = {} do
 	for Index = 0, 128 do
 		PowerOfTwo[Index] = 2 ^ Index
 	end
 end
-
---[[
-local PowerOfTwo = setmetatable({}, {
-	__index = function(self, Index)
-		local Value = 2 ^ Index
-		self[Index] = Value
-		return Value
-	end;
-})
-
-for Index = 0, 128 do local _ = PowerOfTwo[Index] end
---]]
 
 local BrickColorToNumber, NumberToBrickColor = {}, {} do
 	for Index = 0, 63 do
@@ -269,7 +257,6 @@ function BitBuffer.new()
 	return setmetatable({
 		BitPointer = 0;
 		mBitBuffer = {};
-		HasWarned = false;
 	}, BitBuffer)
 end
 
@@ -296,7 +283,7 @@ end
 **--]]
 function BitBuffer:FromString(String)
 	if type(String) ~= "string" then
-		error(string.format("bad argument #1 in BitBuffer::FromString (string expected, instead got %s)", typeof(String)), 1)
+		error(string.format("bad argument #1 in BitBuffer::FromString (string expected, instead got %s)", typeof(String)), 2)
 	end
 
 	self.mBitBuffer, self.BitPointer = {}, 0
@@ -310,16 +297,6 @@ function BitBuffer:FromString(String)
 			ByteCharacter = ByteCharacter - ByteCharacter % 1
 		end
 	end
-
---	for Character in string.gmatch(String, ".") do
---		local ByteCharacter = string.byte(Character)
---		for _ = 1, 8 do
---			self.BitPointer = self.BitPointer + 1
---			self.mBitBuffer[self.BitPointer] = ByteCharacter % 2
---			ByteCharacter = ByteCharacter / 2
---			ByteCharacter = ByteCharacter - ByteCharacter % 1
---		end
---	end
 
 	self.BitPointer = 0
 end
@@ -353,7 +330,7 @@ end
 **--]]
 function BitBuffer:FromBase64(String)
 	if type(String) ~= "string" then
-		error(string.format("bad argument #1 in BitBuffer::FromBase64 (string expected, instead got %s)", typeof(String)), 1)
+		error(string.format("bad argument #1 in BitBuffer::FromBase64 (string expected, instead got %s)", typeof(String)), 2)
 	end
 
 	self.mBitBuffer, self.BitPointer = {}, 0
@@ -361,7 +338,7 @@ function BitBuffer:FromBase64(String)
 	for Index = 1, #String do
 		local Character = string.sub(String, Index, Index)
 		local ByteCharacter = Base64ToNumber[Character]
-		if not ByteCharacter then error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 1) end
+		if not ByteCharacter then error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 2) end
 
 		for _ = 1, 6 do
 			self.BitPointer = self.BitPointer + 1
@@ -371,25 +348,9 @@ function BitBuffer:FromBase64(String)
 		end
 
 		if ByteCharacter ~= 0 then
-			error("Character value 0x" .. ToBase(Base64ToNumber[Character], 16) .. " too large", 1)
+			error("Character value 0x" .. ToBase(Base64ToNumber[Character], 16) .. " too large", 2)
 		end
 	end
-
---	for Character in string.gmatch(String, ".") do
---		local ByteCharacter = Base64ToNumber[Character]
---		if not ByteCharacter then error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 1) end
---
---		for _ = 1, 6 do
---			self.BitPointer = self.BitPointer + 1
---			self.mBitBuffer[self.BitPointer] = ByteCharacter % 2
---			ByteCharacter = ByteCharacter / 2
---			ByteCharacter = ByteCharacter - ByteCharacter % 1
---		end
---
---		if ByteCharacter ~= 0 then
---			error("Character value 0x" .. ToBase(Base64ToNumber[Character], 16) .. " too large", 1)
---		end
---	end
 
 	self.BitPointer = 0
 end
@@ -427,7 +388,7 @@ end
 **--]]
 function BitBuffer:FromBase128(String)
 	if type(String) ~= "string" then
-		error(string.format("bad argument #1 in BitBuffer::FromBase128 (string expected, instead got %s)", typeof(String)), 1)
+		error(string.format("bad argument #1 in BitBuffer::FromBase128 (string expected, instead got %s)", typeof(String)), 2)
 	end
 
 	self.mBitBuffer, self.BitPointer = {}, 0
@@ -436,7 +397,7 @@ function BitBuffer:FromBase128(String)
 		local Character = string.sub(String, Index, Index)
 		local ByteCharacter = Base128ToNumber[Character]
 		if not ByteCharacter then
-			error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 1)
+			error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 2)
 		end
 
 		for _ = 1, 7 do
@@ -447,27 +408,9 @@ function BitBuffer:FromBase128(String)
 		end
 
 		if ByteCharacter ~= 0 then
-			error("Character value 0x" .. ToBase(Base128ToNumber[Character], 16) .. " too large", 1)
+			error("Character value 0x" .. ToBase(Base128ToNumber[Character], 16) .. " too large", 2)
 		end
 	end
-
---	for Character in string.gmatch(String, ".") do
---		local ByteCharacter = Base128ToNumber[Character]
---		if not ByteCharacter then
---			error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 1)
---		end
---
---		for _ = 1, 7 do
---			self.BitPointer = self.BitPointer + 1
---			self.mBitBuffer[self.BitPointer] = ByteCharacter % 2
---			ByteCharacter = ByteCharacter / 2
---			ByteCharacter = ByteCharacter - ByteCharacter % 1
---		end
---
---		if ByteCharacter ~= 0 then
---			error("Character value 0x" .. ToBase(Base128ToNumber[Character], 16) .. " too large", 1)
---		end
---	end
 
 	self.BitPointer = 0
 end
@@ -522,8 +465,8 @@ function BitBuffer:Dump()
 		end
 	end
 
-	print("Bytes:", String)
-	print("Bits:", String2)
+	print("[Dump] Bytes:", String)
+	print("[Dump] Bits:", String2)
 end
 
 function BitBuffer:_readBit()
@@ -559,11 +502,11 @@ end
 **--]]
 function BitBuffer:WriteUnsigned(Width, Value)
 	if type(Width) ~= "number" then
-		error(string.format("bad argument #1 in BitBuffer::WriteUnsigned (number expected, instead got %s)", DetermineType(Width)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteUnsigned (number expected, instead got %s)", DetermineType(Width)), 2)
 	end
 
 	if not (Value or type(Value) == "number" or Value >= 0 or Value % 1 == 0) then
-		error(string.format("bad argument #2 in BitBuffer::WriteUnsigned (positive integer expected, instead got %s)", DetermineType(Value)), 1)
+		error(string.format("bad argument #2 in BitBuffer::WriteUnsigned (positive integer expected, instead got %s)", DetermineType(Value)), 2)
 	end
 
 	-- Store LSB first
@@ -575,7 +518,7 @@ function BitBuffer:WriteUnsigned(Width, Value)
 	end
 
 	if Value ~= 0 then
-		error("Value " .. tostring(Value) .. " has width greater than " .. Width .. " bits", 1)
+		error("Value " .. tostring(Value) .. " has width greater than " .. Width .. " bits", 2)
 	end
 end
 
@@ -597,8 +540,8 @@ end
 	@returns [void]
 **--]]
 function BitBuffer:WriteSigned(Width, Value)
-	if not (Width and Value) then error("bad arguments in BitBuffer::WriteSigned (missing values)", 1) end
-	if Value % 1 ~= 0 then error("Non-integer value to BitBuffer::WriteSigned", 1) end
+	if not (Width and Value) then error("bad arguments in BitBuffer::WriteSigned (missing values)", 2) end
+	if Value % 1 ~= 0 then error("Non-integer value to BitBuffer::WriteSigned", 2) end
 
 	-- Write sign
 	if Value < 0 then
@@ -630,7 +573,7 @@ end
 **--]]
 function BitBuffer:WriteString(String)
 	if type(String) ~= "string" then
-		error(string.format("bad argument #1 in BitBuffer::WriteString (string expected, instead got %s)", typeof(String)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteString (string expected, instead got %s)", typeof(String)), 2)
 	end
 
 	-- First check if it's a 7 or 8 bit width of string
@@ -642,13 +585,6 @@ function BitBuffer:WriteString(String)
 			break
 		end
 	end
-
---	for Character in string.gmatch(String, ".") do
---		if string.byte(Character) > 127 then
---			BitWidth = 8
---			break
---		end
---	end
 
 	-- Write the bit width flag
 	self:WriteUnsigned(1, BitWidth == 7 and 0 or 1) -- 1 for wide chars
@@ -664,16 +600,6 @@ function BitBuffer:WriteString(String)
 			self:WriteUnsigned(BitWidth, ByteCharacter)
 		end
 	end
-
---	for Character in string.gmatch(String, ".") do
---		local ByteCharacter = string.byte(Character)
---		if ByteCharacter == 0x10 then
---			self:WriteUnsigned(BitWidth, 0x10)
---			self:WriteUnsigned(1, 1)
---		else
---			self:WriteUnsigned(BitWidth, ByteCharacter)
---		end
---	end
 
 	-- Write terminator
 	self:WriteUnsigned(BitWidth, 0x10)
@@ -713,7 +639,7 @@ end
 **--]]
 function BitBuffer:WriteBool(Boolean)
 	if type(Boolean) ~= "boolean" then
-		error(string.format("bad argument #1 in BitBuffer::WriteBool (boolean expected, instead got %s)", typeof(Boolean)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteBool (boolean expected, instead got %s)", typeof(Boolean)), 2)
 	end
 
 	self:WriteUnsigned(1, Boolean and 1 or 0)
@@ -738,7 +664,7 @@ end
 	@returns [void]
 **--]]
 function BitBuffer:WriteFloat(Fraction, WriteExponent, Float)
-	if not (Fraction and WriteExponent and Float) then error("missing argument(s)", 1) end
+	if not (Fraction and WriteExponent and Float) then error("missing argument(s)", 2) end
 
 	-- Sign
 	local Sign = 1
@@ -776,7 +702,7 @@ end
 	@returns [t:number] The float.
 **--]]
 function BitBuffer:ReadFloat(Fraction, WriteExponent)
-	if not (Fraction and WriteExponent) then error("missing argument(s)", 1) end
+	if not (Fraction and WriteExponent) then error("missing argument(s)", 2) end
 
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(Fraction)
@@ -879,30 +805,48 @@ function BitBuffer:ReadFloat64()
 	return Sign * math.ldexp(Mantissa, Exponent)
 end
 
--- Roblox DataTypes:
+-- Roblox DataTypes
 
---[[**
-	[DEPRECATED] Writes a BrickColor to the BitBuffer.
-	@param [t:BrickColor] Color The BrickColor you are writing to the BitBuffer.
-	@returns [void]
-**--]]
-function BitBuffer:WriteBrickColor(Color)
-	if typeof(Color) ~= "BrickColor" then
-		error(string.format("bad argument #1 in BitBuffer::WriteBrickColor (BrickColor expected, instead got %s)", typeof(Color)), 1)
-	end
+if DEPRECATED_WARNING then
+	--[[**
+		[DEPRECATED] Writes a BrickColor to the BitBuffer.
+		@param [t:BrickColor] Color The BrickColor you are writing to the BitBuffer.
+		@returns [void]
+	**--]]
+	function BitBuffer:WriteBrickColor(Color)
+		if typeof(Color) ~= "BrickColor" then
+			error(string.format("bad argument #1 in BitBuffer::WriteBrickColor (BrickColor expected, instead got %s)", typeof(Color)), 2)
+		end
 
-	if not self.HasWarned then
-		self.HasWarned = true
 		warn("::WriteBrickColor is deprecated. Using ::WriteColor3 is suggested instead.")
-	end
 
-	local BrickColorNumber = BrickColorToNumber[Color.Number]
-	if not BrickColorNumber then
-		warn("Attempt to serialize non-pallete BrickColor \"" .. tostring(Color) .. "\" (#" .. Color.Number .. "), using Light Stone Grey instead.")
-		BrickColorNumber = BrickColorToNumber[1032]
-	end
+		local BrickColorNumber = BrickColorToNumber[Color.Number]
+		if not BrickColorNumber then
+			warn("Attempt to serialize non-pallete BrickColor \"" .. tostring(Color) .. "\" (#" .. Color.Number .. "), using Light Stone Grey instead.")
+			BrickColorNumber = BrickColorToNumber[1032]
+		end
 
-	self:WriteUnsigned(6, BrickColorNumber)
+		self:WriteUnsigned(6, BrickColorNumber)
+	end
+else
+	--[[**
+		[DEPRECATED] Writes a BrickColor to the BitBuffer.
+		@param [t:BrickColor] Color The BrickColor you are writing to the BitBuffer.
+		@returns [void]
+	**--]]
+	function BitBuffer:WriteBrickColor(Color)
+		if typeof(Color) ~= "BrickColor" then
+			error(string.format("bad argument #1 in BitBuffer::WriteBrickColor (BrickColor expected, instead got %s)", typeof(Color)), 2)
+		end
+
+		local BrickColorNumber = BrickColorToNumber[Color.Number]
+		if not BrickColorNumber then
+			warn("Attempt to serialize non-pallete BrickColor \"" .. tostring(Color) .. "\" (#" .. Color.Number .. "), using Light Stone Grey instead.")
+			BrickColorNumber = BrickColorToNumber[1032]
+		end
+
+		self:WriteUnsigned(6, BrickColorNumber)
+	end
 end
 
 --[[**
@@ -920,7 +864,7 @@ end
 **--]]
 function BitBuffer:WriteRotation(CoordinateFrame)
 	if typeof(CoordinateFrame) ~= "CFrame" then
-		error(string.format("bad argument #1 in BitBuffer::WriteRotation (CFrame expected, instead got %s)", typeof(CoordinateFrame)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteRotation (CFrame expected, instead got %s)", typeof(CoordinateFrame)), 2)
 	end
 
 	local LookVector = CoordinateFrame.LookVector
@@ -971,15 +915,14 @@ end
 **--]]
 function BitBuffer:WriteColor3(Color)
 	if typeof(Color) ~= "Color3" then
-		error(string.format("bad argument #1 in BitBuffer::WriteColor3 (Color3 expected, instead got %s)", typeof(Color)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteColor3 (Color3 expected, instead got %s)", typeof(Color)), 2)
 	end
 
 	local R, G, B = Color.R * 255, Color.G * 255, Color.B * 255
-	R, G, B = R - R % 1, G - G % 1, B - B % 1
 
-	self:WriteUnsigned(8, R)
-	self:WriteUnsigned(8, G)
-	self:WriteUnsigned(8, B)
+	self:WriteUnsigned(8, R - R % 1)
+	self:WriteUnsigned(8, G - G % 1)
+	self:WriteUnsigned(8, B - B % 1)
 end
 
 --[[**
@@ -997,7 +940,7 @@ end
 **--]]
 function BitBuffer:WriteVector3(Vector)
 	if typeof(Vector) ~= "Vector3" then
-		error(string.format("bad argument #1 in BitBuffer::WriteVector3 (Vector3 expected, instead got %s)", typeof(Vector)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteVector3 (Vector3 expected, instead got %s)", typeof(Vector)), 2)
 	end
 
 	self:WriteFloat32(Vector.X)
@@ -1020,7 +963,7 @@ end
 **--]]
 function BitBuffer:WriteCFrame(CoordinateFrame)
 	if typeof(CoordinateFrame) ~= "CFrame" then
-		error(string.format("bad argument #1 in BitBuffer::WriteCFrame (CFrame expected, instead got %s)", typeof(CoordinateFrame)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteCFrame (CFrame expected, instead got %s)", typeof(CoordinateFrame)), 2)
 	end
 
 	self:WriteVector3Float64(CoordinateFrame.Position)
@@ -1042,7 +985,7 @@ end
 **--]]
 function BitBuffer:WriteVector2(Vector)
 	if typeof(Vector) ~= "Vector2" then
-		error(string.format("bad argument #1 in BitBuffer::WriteVector2 (Vector2 expected, instead got %s)", typeof(Vector)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteVector2 (Vector2 expected, instead got %s)", typeof(Vector)), 2)
 	end
 
 	self:WriteFloat32(Vector.X)
@@ -1064,7 +1007,7 @@ end
 **--]]
 function BitBuffer:WriteUDim2(Value)
 	if typeof(Value) ~= "UDim2" then
-		error(string.format("bad argument #1 in BitBuffer::WriteUDim2 (UDim2 expected, instead got %s)", typeof(Value)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteUDim2 (UDim2 expected, instead got %s)", typeof(Value)), 2)
 	end
 
 	self:WriteFloat32(Value.X.Scale)
@@ -1088,7 +1031,7 @@ end
 **--]]
 function BitBuffer:WriteVector3Float64(Vector)
 	if typeof(Vector) ~= "Vector3" then
-		error(string.format("bad argument #1 in BitBuffer::WriteVector3Float64 (Vector3 expected, instead got %s)", typeof(Vector)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteVector3Float64 (Vector3 expected, instead got %s)", typeof(Vector)), 2)
 	end
 
 	self:WriteFloat64(Vector.X)
@@ -1111,7 +1054,7 @@ end
 **--]]
 function BitBuffer:WriteVector2Float64(Vector)
 	if typeof(Vector) ~= "Vector2" then
-		error(string.format("bad argument #1 in BitBuffer::WriteVector2Float64 (Vector2 expected, instead got %s)", typeof(Vector)), 1)
+		error(string.format("bad argument #1 in BitBuffer::WriteVector2Float64 (Vector2 expected, instead got %s)", typeof(Vector)), 2)
 	end
 
 	self:WriteFloat64(Vector.X)
@@ -1148,11 +1091,11 @@ end
 **--]]
 function BitBuffer.BitsNeeded(Number)
 	if type(Number) ~= "number" then
-		error(string.format("bad argument #1 in BitBuffer.BitsNeeded (number expected, instead got %s)", typeof(Number)), 1)
+		error(string.format("bad argument #1 in BitBuffer.BitsNeeded (number expected, instead got %s)", typeof(Number)), 2)
 	end
 
 	local Bits = math.log10(Number + 1) / LOG_10_OF_2
-	return Bits + (1 - Bits % 1)
+	return Bits + (1 - Bits % 1) -- Equivalent to ceil
 end
 
 return BitBuffer
