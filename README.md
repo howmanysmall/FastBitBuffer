@@ -1,6 +1,6 @@
 # FastBitBuffer
 
-This is currently the fastest BitBuffer for Roblox. It is around 65% faster than any of the competition.
+This is currently the fastest BitBuffer for Roblox. It is around 65-75% faster than any of the competition. If you have any possible ideas to make it faster, feel free to make a pull request.
 
 ## Usage
 
@@ -718,3 +718,9 @@ for _, Player in ipairs(Players:GetPlayers()) do PlayerAdded(Player) end
 
 - [DataStore2](https://github.com/Kampfkarren/Roblox/tree/master/DataStore2) - Very popular for a reason. To learn how to use it, I recommend either reading the [docs](https://kampfkarren.github.io/Roblox/) or [asking on the DevForum post](https://devforum.roblox.com/t/how-to-use-datastore2-data-store-caching-and-data-loss-prevention/136317).
 - [Nevermore DataStores](https://github.com/Quenty/NevermoreEngine/tree/version2/Modules/Server/DataStore) - A very good module system. Uses other modules in Nevermore, so beware. To learn how to use it, read the [readme file](https://github.com/Quenty/NevermoreEngine/blob/version2/Modules/Server/DataStore/README.md).
+
+## Credits
+
+- Defaultio - created the original Base128 module I based this on.
+- TheNexusAvenger - Created some of the float functions.
+- Stravant - Created the original module itself.
