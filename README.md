@@ -4,13 +4,15 @@ This is currently the fastest BitBuffer for Roblox. It is around 65-75% faster t
 
 ## Usage
 
-To use this BitBuffer, just copy the source of the [init.lua](https://github.com/howmanysmall/FastBitBuffer/blob/master/FastBitBuffer/init.lua) file to a ModuleScript, and require it.
+To use this BitBuffer, just copy the source of the [init.lua](https://github.com/howmanysmall/FastBitBuffer/blob/master/src/init.lua) file to a ModuleScript, and require it.
 
 ![FastBitBuffer Setup](https://raw.githubusercontent.com/howmanysmall/FastBitBuffer/master/docs/FastBitBufferSetup.png)
 
 To actually use the BitBuffer, you need to use the following API.
 
 ## API
+
+This is the API of the BitBuffer. Every function has a lowerCamelCase equivalent to it.
 
 <details>
 <summary><code>function BitBuffer.new()</code></summary>
