@@ -1,7 +1,4 @@
- --[[
-
-==========================================================================
-==									API								 ==
+--[[
 
 Differences from the original:
 	Using metatables instead of a function returning a table.
@@ -212,6 +209,13 @@ local NumberToBase128, Base128ToNumber = {}, {} do -- edit
 	end
 end --/edit
 
+local PowerOfTwo = {} do
+	for Index = 0, 128 do
+		PowerOfTwo[Index] = 2 ^ Index
+	end
+end
+
+--[[
 local PowerOfTwo = setmetatable({}, {
 	__index = function(self, Index)
 		local Value = 2 ^ Index
@@ -221,6 +225,7 @@ local PowerOfTwo = setmetatable({}, {
 })
 
 for Index = 0, 128 do local _ = PowerOfTwo[Index] end
+--]]
 
 local BrickColorToNumber, NumberToBrickColor = {}, {} do
 	for Index = 0, 63 do
@@ -253,21 +258,36 @@ local function ToBase(Number, Base)
 	return Sign .. table.concat(Array)
 end
 
+--[[**
+	Creates a new BitBuffer.
+	@returns [BitBuffer] The new BitBuffer.
+**--]]
 function BitBuffer.new()
 	return setmetatable({
 		BitPointer = 0;
 		mBitBuffer = {};
+		HasWarned = false;
 	}, BitBuffer)
 end
 
+--[[**
+	Resets the BitBuffer's BitPointer.
+**--]]
 function BitBuffer:ResetPointer()
 	self.BitPointer = 0
 end
 
+--[[**
+	Resets the BitBuffer's BitPointer and buffer table.
+**--]]
 function BitBuffer:Reset()
 	self.mBitBuffer, self.BitPointer = {}, 0
 end
 
+--[[**
+	Reads the given string and writes to the BitBuffer accordingly. Not really useful.
+	@param [t:string] String The string.
+**--]]
 function BitBuffer:FromString(String)
 	if type(String) ~= "string" then
 		error(string.format("bad argument #1 in BitBuffer::FromString (string expected, instead got %s)", typeof(String)), 1)
@@ -298,6 +318,10 @@ function BitBuffer:FromString(String)
 	self.BitPointer = 0
 end
 
+--[[**
+	Writes the BitBuffer to a string.
+	@returns [t:string] The BitBuffer string.
+**--]]
 function BitBuffer:ToString()
 	local String = ""
 	local Accumulator = 0
@@ -316,7 +340,10 @@ function BitBuffer:ToString()
 	return String
 end
 
--- Read / Write to base64
+--[[**
+	Reads the given Base64 string and writes to the BitBuffer accordingly.
+	@param [t:string] String The Base64 string.
+**--]]
 function BitBuffer:FromBase64(String)
 	if type(String) ~= "string" then
 		error(string.format("bad argument #1 in BitBuffer::FromBase64 (string expected, instead got %s)", typeof(String)), 1)
@@ -360,6 +387,10 @@ function BitBuffer:FromBase64(String)
 	self.BitPointer = 0
 end
 
+--[[**
+	Writes the BitBuffer to a Base64 string.
+	@returns [t:string] The BitBuffer encoded in Base64.
+**--]]
 function BitBuffer:ToBase64()
 	local Array = {}
 	local Length = 0
@@ -382,7 +413,10 @@ function BitBuffer:ToBase64()
 	return table.concat(Array)
 end
 
--- Read / Write to base128 -- edit
+--[[**
+	Reads the given Base128 string and writes to the BitBuffer accordingly. Not recommended. Credit to Defaultio for the original functions.
+	@param [t:string] String The Base128 string.
+**--]]
 function BitBuffer:FromBase128(String)
 	if type(String) ~= "string" then
 		error(string.format("bad argument #1 in BitBuffer::FromBase128 (string expected, instead got %s)", typeof(String)), 1)
@@ -430,6 +464,10 @@ function BitBuffer:FromBase128(String)
 	self.BitPointer = 0
 end
 
+--[[**
+	Writes the BitBuffer to Base128. Not recommended. Credit to Defaultio for the original functions.
+	@returns [t:string] The BitBuffer encoded in Base128.
+**--]]
 function BitBuffer:ToBase128()
 	local Array = {}
 	local Length = 0
@@ -449,9 +487,11 @@ function BitBuffer:ToBase128()
 	end
 
 	return table.concat(Array)
-end	-- /edit
+end
 
--- Dump
+--[[**
+	Dumps the BitBuffer data and prints it.
+**--]]
 function BitBuffer:Dump()
 	local String = ""
 	local String2 = ""
@@ -502,9 +542,14 @@ local function DetermineType(Value)
 	return ActualType
 end
 
+--[[**
+	Writes an unsigned number to the BitBuffer.
+	@param [t:integer] Width The bit width of the value.
+	@param [t:integer] Value The unsigned integer.
+**--]]
 function BitBuffer:WriteUnsigned(Width, Value)
-	if not Width then
-		error("bad argument #1 in BitBuffer::WriteUnsigned (missing Width)", 1)
+	if type(Width) ~= "number" then
+		error(string.format("bad argument #1 in BitBuffer::WriteUnsigned (number expected, instead got %s)", DetermineType(Width)), 1)
 	end
 
 	if not (Value or type(Value) == "number" or Value >= 0 or Value % 1 == 0) then
@@ -530,7 +575,11 @@ function BitBuffer:ReadUnsigned(Width)
 	return Value
 end
 
--- Read / Write a signed number
+--[[**
+	Writes a signed integer to the BitBuffer.
+	@param [t:integer] Width The bit width of the value.
+	@param [t:integer] Value The signed integer.
+**--]]
 function BitBuffer:WriteSigned(Width, Value)
 	if not (Width and Value) then error("bad arguments in BitBuffer::WriteSigned (missing values)", 1) end
 	if Value % 1 ~= 0 then error("Non-integer value to BitBuffer::WriteSigned", 1) end
@@ -548,13 +597,21 @@ function BitBuffer:WriteSigned(Width, Value)
 	self:WriteUnsigned(Width - 1, Value)
 end
 
+--[[**
+	Reads a signed integer from the BitBuffer.
+	@param [t:integer] Width The bit width of the value.
+	@returns [t:integer] The signed integer.
+**--]]
 function BitBuffer:ReadSigned(Width)
 	self.BitPointer = self.BitPointer + 1
 	return ((-1) ^ self.mBitBuffer[self.BitPointer]) * self:ReadUnsigned(Width - 1)
---	return ((-1) ^ self:_readBit()) * self:ReadUnsigned(Width - 1)
 end
 
 -- Read / Write a string. May contain embedded nulls (string.char(0))
+--[[**
+	Writes a string to the BitBuffer.
+	@param [t:string] String The string you are writing to the BitBuffer.
+**--]]
 function BitBuffer:WriteString(String)
 	if type(String) ~= "string" then
 		error(string.format("bad argument #1 in BitBuffer::WriteString (string expected, instead got %s)", typeof(String)), 1)
@@ -609,7 +666,7 @@ end
 
 --[[**
 	Reads the BitBuffer for a string.
-	@returns [String]
+	@returns [t:string] The string written to the BitBuffer.
 **--]]
 function BitBuffer:ReadString()
 	-- Get bit width
@@ -635,7 +692,7 @@ end
 
 --[[**
 	Writes a boolean to the BitBuffer.
-	@param [Boolean] Boolean The value you are writing to the BitBuffer.
+	@param [t:boolean] Boolean The value you are writing to the BitBuffer.
 **--]]
 function BitBuffer:WriteBool(Boolean)
 	if type(Boolean) ~= "boolean" then
@@ -647,7 +704,7 @@ end
 
 --[[**
 	Reads the BitBuffer for a boolean.
-	@returns [Boolean]
+	@returns [t:boolean] The boolean.
 **--]]
 function BitBuffer:ReadBool()
 	return self:ReadUnsigned(1) == 1
@@ -657,10 +714,10 @@ end
 -- bits, |wexp| exponent part bits, and one sign bit.
 
 --[[**
-	Write a floating point number with |wfrac| fraction part to the BitBuffer.
-	@param [Integer] wfrac The number of bits.
-	@param [Integer] wexp
-	@param [Number] f The float itself.
+	Writes a float to the BitBuffer.
+	@param [t:integer] Fraction The number of bits (probably).
+	@param [t:integer] WriteExponent The number of bits for the decimal (probably).
+	@param [t:number] Float The actual number you are writing.
 **--]]
 function BitBuffer:WriteFloat(Fraction, WriteExponent, Float)
 	if not (Fraction and WriteExponent and Float) then error("missing argument(s)", 1) end
@@ -694,6 +751,12 @@ function BitBuffer:WriteFloat(Fraction, WriteExponent, Float)
 	self:WriteSigned(WriteExponent, Exponent > MaxExp and MaxExp or Exponent < -MaxExp and -MaxExp or Exponent)
 end
 
+--[[**
+	Reads a float from the BitBuffer.
+	@param [t:integer] Fraction The number of bits (probably).
+	@param [t:integer] WriteExponent The number of bits for the decimal (probably).
+	@returns [t:number] The float.
+**--]]
 function BitBuffer:ReadFloat(Fraction, WriteExponent)
 	if not (Fraction and WriteExponent) then error("missing argument(s)", 1) end
 
@@ -706,10 +769,18 @@ function BitBuffer:ReadFloat(Fraction, WriteExponent)
 	return Sign * math.ldexp(Mantissa, Exponent)
 end
 
+--[[**
+	Writes a float8 (quarter precision) to the BitBuffer.
+	@param [t:number] The float8.
+**--]]
 function BitBuffer:WriteFloat8(Float)
 	self:WriteFloat(3, 4, Float)
 end
 
+--[[**
+	Reads a float8 (quarter precision) from the BitBuffer.
+	@returns [t:number] The float8.
+**--]]
 function BitBuffer:ReadFloat8()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(3)
@@ -720,11 +791,18 @@ function BitBuffer:ReadFloat8()
 	return Sign * math.ldexp(Mantissa, Exponent)
 end
 
--- Read / Write half precision floating point
+--[[**
+	Writes a float16 (half precision) to the BitBuffer.
+	@param [t:number] The float16.
+**--]]
 function BitBuffer:WriteFloat16(Float)
 	self:WriteFloat(10, 5, Float)
 end
 
+--[[**
+	Reads a float16 (half precision) from the BitBuffer.
+	@returns [t:number] The float16.
+**--]]
 function BitBuffer:ReadFloat16()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(10)
@@ -735,11 +813,18 @@ function BitBuffer:ReadFloat16()
 	return Sign * math.ldexp(Mantissa, Exponent)
 end
 
--- Read / Write single precision floating point
+--[[**
+	Writes a float32 (single precision) to the BitBuffer.
+	@param [t:number] The float32.
+**--]]
 function BitBuffer:WriteFloat32(Float)
 	self:WriteFloat(23, 8, Float)
 end
 
+--[[**
+	Reads a float32 (single precision) from the BitBuffer.
+	@returns [t:number] The float32.
+**--]]
 function BitBuffer:ReadFloat32()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(23)
@@ -750,11 +835,18 @@ function BitBuffer:ReadFloat32()
 	return Sign * math.ldexp(Mantissa, Exponent)
 end
 
--- Read / Write double precision floating point
+--[[**
+	Writes a float64 (double precision) to the BitBuffer.
+	@param [t:number] The float64.
+**--]]
 function BitBuffer:WriteFloat64(Float)
 	self:WriteFloat(52, 11, Float)
 end
 
+--[[**
+	Reads a float64 (double precision) from the BitBuffer.
+	@returns [t:number] The float64.
+**--]]
 function BitBuffer:ReadFloat64()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(52)
@@ -767,27 +859,41 @@ end
 
 -- Roblox DataTypes:
 
--- Read / Write a BrickColor
+--[[**
+	[DEPRECATED] Writes a BrickColor to the BitBuffer.
+	@param [t:BrickColor] Color The BrickColor you are writing to the BitBuffer.
+**--]]
 function BitBuffer:WriteBrickColor(Color)
 	if typeof(Color) ~= "BrickColor" then
 		error(string.format("bad argument #1 in BitBuffer::WriteBrickColor (BrickColor expected, instead got %s)", typeof(Color)), 1)
 	end
 
-	warn("::WriteBrickColor is deprecated. Using ::WriteColor3 is suggested instead.")
+	if not self.HasWarned then
+		self.HasWarned = true
+		warn("::WriteBrickColor is deprecated. Using ::WriteColor3 is suggested instead.")
+	end
 
 	local BrickColorNumber = BrickColorToNumber[Color.Number]
 	if not BrickColorNumber then
-		warn("Attempt to serialize non-pallete BrickColor `" .. tostring(Color) .. "` (#" .. Color.Number .. "), using Light Stone Grey instead.")
+		warn("Attempt to serialize non-pallete BrickColor \"" .. tostring(Color) .. "\" (#" .. Color.Number .. "), using Light Stone Grey instead.")
 		BrickColorNumber = BrickColorToNumber[1032]
 	end
 
 	self:WriteUnsigned(6, BrickColorNumber)
 end
 
+--[[**
+	[DEPRECATED] Reads a BrickColor from the BitBuffer.
+	@returns [t:BrickColor] The BrickColor read from the BitBuffer.
+**--]]
 function BitBuffer:ReadBrickColor()
 	return NumberToBrickColor[self:ReadUnsigned(6)]
 end
 
+--[[**
+	Writes the rotation part of a CFrame into the BitBuffer.
+	@param [t:CFrame] CoordinateFrame The CFrame you wish to write.
+**--]]
 function BitBuffer:WriteRotation(CoordinateFrame)
 	if typeof(CoordinateFrame) ~= "CFrame" then
 		error(string.format("bad argument #1 in BitBuffer::WriteRotation (CFrame expected, instead got %s)", typeof(CoordinateFrame)), 1)
@@ -795,7 +901,7 @@ function BitBuffer:WriteRotation(CoordinateFrame)
 
 	local LookVector = CoordinateFrame.LookVector
 	local Azumith = math.atan2(-LookVector.X, -LookVector.Z)
-	local Elevation = math.atan2(LookVector.Y, math.sqrt(LookVector.X * LookVector.X + LookVector.Z * LookVector.Z))
+	local Elevation = math.atan2(LookVector.Y, (LookVector.X * LookVector.X + LookVector.Z * LookVector.Z) ^ 0.5)
 	local WithoutRoll = CFrame.new(CoordinateFrame.Position) * CFrame.Angles(0, Azumith, 0) * CFrame.Angles(Elevation, 0, 0)
 	local _, _, Roll = (WithoutRoll:Inverse() * CoordinateFrame):ToEulerAnglesXYZ()
 
@@ -814,6 +920,10 @@ function BitBuffer:WriteRotation(CoordinateFrame)
 	self:WriteSigned(21, Elevation)
 end
 
+--[[**
+	Reads the rotation part of a CFrame saved in the BitBuffer.
+	@returns [t:CFrame] The rotation read from the BitBuffer.
+**--]]
 function BitBuffer:ReadRotation()
 	local Azumith = self:ReadSigned(22)
 	local Roll = self:ReadSigned(21)
@@ -830,6 +940,10 @@ function BitBuffer:ReadRotation()
 	return Rotation
 end
 
+--[[**
+	Writes a Color3 to the BitBuffer.
+	@param [t:Color3] Color The color you want to write into the BitBuffer.
+**--]]
 function BitBuffer:WriteColor3(Color)
 	if typeof(Color) ~= "Color3" then
 		error(string.format("bad argument #1 in BitBuffer::WriteColor3 (Color3 expected, instead got %s)", typeof(Color)), 1)
@@ -843,10 +957,18 @@ function BitBuffer:WriteColor3(Color)
 	self:WriteUnsigned(8, B)
 end
 
+--[[**
+	Reads a Color3 from the BitBuffer.
+	@returns [t:Color3] The color read from the BitBuffer.
+**--]]
 function BitBuffer:ReadColor3()
 	return Color3.fromRGB(self:ReadUnsigned(8), self:ReadUnsigned(8), self:ReadUnsigned(8))
 end
 
+--[[**
+	Writes a Vector3 to the BitBuffer. Writes with Float32 precision.
+	@param [t:Vector3] Vector The vector you want to write into the BitBuffer.
+**--]]
 function BitBuffer:WriteVector3(Vector)
 	if typeof(Vector) ~= "Vector3" then
 		error(string.format("bad argument #1 in BitBuffer::WriteVector3 (Vector3 expected, instead got %s)", typeof(Vector)), 1)
@@ -857,10 +979,18 @@ function BitBuffer:WriteVector3(Vector)
 	self:WriteFloat32(Vector.Z)
 end
 
+--[[**
+	Reads a Vector3 from the BitBuffer. Uses Float32 precision.
+	@returns [t:Vector3] The vector read from the BitBuffer.
+**--]]
 function BitBuffer:ReadVector3()
 	return Vector3.new(self:ReadFloat32(), self:ReadFloat32(), self:ReadFloat32())
 end
 
+--[[**
+	Writes a full CFrame (position and rotation) to the BitBuffer. Uses Float64 precision.
+	@param [t:CFrame] CoordinateFrame The CFrame you are writing to the BitBuffer.
+**--]]
 function BitBuffer:WriteCFrame(CoordinateFrame)
 	if typeof(CoordinateFrame) ~= "CFrame" then
 		error(string.format("bad argument #1 in BitBuffer::WriteCFrame (CFrame expected, instead got %s)", typeof(CoordinateFrame)), 1)
@@ -870,10 +1000,18 @@ function BitBuffer:WriteCFrame(CoordinateFrame)
 	self:WriteRotation(CoordinateFrame)
 end
 
+--[[**
+	Reads a full CFrame (position and rotation) from the BitBuffer. Uses Float64 precision.
+	@returns [t:CFrame] The CFrame you are reading from the BitBuffer.
+**--]]
 function BitBuffer:ReadCFrame()
 	return CFrame.new(self:ReadVector3Float64()) * self:ReadRotation()
 end
 
+--[[**
+	Writes a Vector2 to the BitBuffer. Writes with Float32 precision.
+	@param [t:Vector2] Vector The vector you want to write into the BitBuffer.
+**--]]
 function BitBuffer:WriteVector2(Vector)
 	if typeof(Vector) ~= "Vector2" then
 		error(string.format("bad argument #1 in BitBuffer::WriteVector2 (Vector2 expected, instead got %s)", typeof(Vector)), 1)
@@ -883,25 +1021,41 @@ function BitBuffer:WriteVector2(Vector)
 	self:WriteFloat32(Vector.Y)
 end
 
+--[[**
+	Reads a Vector2 from the BitBuffer. Uses Float32 precision.
+	@returns [t:Vector2] The vector read from the BitBuffer.
+**--]]
 function BitBuffer:ReadVector2()
 	return Vector2.new(self:ReadFloat32(), self:ReadFloat32())
 end
 
+--[[**
+	Writes a UDim2 to the BitBuffer. Uses Float32 precision for the scale.
+	@param [t:UDim2] Value The UDim2 you are writing to the BitBuffer.
+**--]]
 function BitBuffer:WriteUDim2(Value)
 	if typeof(Value) ~= "UDim2" then
 		error(string.format("bad argument #1 in BitBuffer::WriteUDim2 (UDim2 expected, instead got %s)", typeof(Value)), 1)
 	end
 
-	self:WriteSigned(17, Value.X.Offset)
 	self:WriteFloat32(Value.X.Scale)
-	self:WriteSigned(17, Value.Y.Offset)
+	self:WriteSigned(17, Value.X.Offset)
 	self:WriteFloat32(Value.Y.Scale)
+	self:WriteSigned(17, Value.Y.Offset)
 end
 
+--[[**
+	Reads a UDim2 from the BitBuffer. Uses Float32 precision for the scale.
+	@returns [t:UDim2] The UDim2 read from the BitBuffer.
+**--]]
 function BitBuffer:ReadUDim2()
-	return UDim2.new(self:ReadSigned(17), self:ReadFloat32(), self:ReadSigned(17), self:ReadFloat32())
+	return UDim2.new(self:ReadFloat32(), self:ReadSigned(17), self:ReadFloat32(), self:ReadSigned(17))
 end
 
+--[[**
+	Writes a Vector3 to the BitBuffer. Writes with Float64 precision.
+	@param [t:Vector3] Vector The vector you want to write into the BitBuffer.
+**--]]
 function BitBuffer:WriteVector3Float64(Vector)
 	if typeof(Vector) ~= "Vector3" then
 		error(string.format("bad argument #1 in BitBuffer::WriteVector3Float64 (Vector3 expected, instead got %s)", typeof(Vector)), 1)
@@ -912,10 +1066,18 @@ function BitBuffer:WriteVector3Float64(Vector)
 	self:WriteFloat64(Vector.Z)
 end
 
+--[[**
+	Reads a Vector3 from the BitBuffer. Reads with Float64 precision.
+	@returns [t:Vector3] The vector read from the BitBuffer.
+**--]]
 function BitBuffer:ReadVector3Float64()
 	return Vector3.new(self:ReadFloat64(), self:ReadFloat64(), self:ReadFloat64())
 end
 
+--[[**
+	Writes a Vector2 to the BitBuffer. Writes with Float64 precision.
+	@param [t:Vector2] Vector The vector you want to write into the BitBuffer.
+**--]]
 function BitBuffer:WriteVector2Float64(Vector)
 	if typeof(Vector) ~= "Vector2" then
 		error(string.format("bad argument #1 in BitBuffer::WriteVector2Float64 (Vector2 expected, instead got %s)", typeof(Vector)), 1)
@@ -925,6 +1087,10 @@ function BitBuffer:WriteVector2Float64(Vector)
 	self:WriteFloat64(Vector.Y)
 end
 
+--[[**
+	Reads a Vector2 from the BitBuffer. Reads with Float64 precision.
+	@returns [t:Vector2] The vector read from the BitBuffer.
+**--]]
 function BitBuffer:ReadVector2Float64()
 	return Vector2.new(self:ReadFloat64(), self:ReadFloat64())
 end
@@ -935,11 +1101,24 @@ BitBuffer.ReadVector3Float32 = BitBuffer.ReadVector3
 BitBuffer.WriteVector2Float32 = BitBuffer.WriteVector2
 BitBuffer.ReadVector2Float32 = BitBuffer.ReadVector2
 
+--[[**
+	Destroys the BitBuffer metatable.
+**--]]
 function BitBuffer:Destroy()
+	self:Reset()
 	setmetatable(self, nil)
 end
 
+--[[**
+	Calculates the amount of bits needed for a given number.
+	@param [t:number] Number The number you want to use.
+	@returns [t:number] The amount of bits needed.
+**--]]
 function BitBuffer.BitsNeeded(Number)
+	if type(Number) ~= "number" then
+		error(string.format("bad argument #1 in BitBuffer.BitsNeeded (number expected, instead got %s)", typeof(Number)), 1)
+	end
+
 	local Bits = math.log10(Number + 1) / LOG_10_OF_2
 	return Bits + (1 - Bits % 1)
 end
