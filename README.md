@@ -1,0 +1,2 @@
+# FastBitBuffer
+Fastest Roblox BitBuffer.
