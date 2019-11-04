@@ -1,4 +1,7 @@
---[[
+ --[[
+
+==========================================================================
+==									API								 ==
 
 Differences from the original:
 	Using metatables instead of a function returning a table.
@@ -272,6 +275,7 @@ end
 
 --[[**
 	Resets the BitBuffer's BitPointer.
+	@returns [void]
 **--]]
 function BitBuffer:ResetPointer()
 	self.BitPointer = 0
@@ -279,6 +283,7 @@ end
 
 --[[**
 	Resets the BitBuffer's BitPointer and buffer table.
+	@returns [void]
 **--]]
 function BitBuffer:Reset()
 	self.mBitBuffer, self.BitPointer = {}, 0
@@ -287,6 +292,7 @@ end
 --[[**
 	Reads the given string and writes to the BitBuffer accordingly. Not really useful.
 	@param [t:string] String The string.
+	@returns [void]
 **--]]
 function BitBuffer:FromString(String)
 	if type(String) ~= "string" then
@@ -343,6 +349,7 @@ end
 --[[**
 	Reads the given Base64 string and writes to the BitBuffer accordingly.
 	@param [t:string] String The Base64 string.
+	@returns [void]
 **--]]
 function BitBuffer:FromBase64(String)
 	if type(String) ~= "string" then
@@ -416,6 +423,7 @@ end
 --[[**
 	Reads the given Base128 string and writes to the BitBuffer accordingly. Not recommended. Credit to Defaultio for the original functions.
 	@param [t:string] String The Base128 string.
+	@returns [void]
 **--]]
 function BitBuffer:FromBase128(String)
 	if type(String) ~= "string" then
@@ -491,6 +499,7 @@ end
 
 --[[**
 	Dumps the BitBuffer data and prints it.
+	@returns [void]
 **--]]
 function BitBuffer:Dump()
 	local String = ""
@@ -546,6 +555,7 @@ end
 	Writes an unsigned number to the BitBuffer.
 	@param [t:integer] Width The bit width of the value.
 	@param [t:integer] Value The unsigned integer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteUnsigned(Width, Value)
 	if type(Width) ~= "number" then
@@ -569,6 +579,11 @@ function BitBuffer:WriteUnsigned(Width, Value)
 	end
 end
 
+--[[**
+	Reads an unsigned integer from the BitBuffer.
+	@param [t:integer] Width The bit width of the value.
+	@returns [t:integer] The unsigned integer.
+**--]]
 function BitBuffer:ReadUnsigned(Width)
 	local Value = 0
 	for Index = 1, Width do Value = Value + self:_readBit() * PowerOfTwo[Index - 1] end
@@ -579,6 +594,7 @@ end
 	Writes a signed integer to the BitBuffer.
 	@param [t:integer] Width The bit width of the value.
 	@param [t:integer] Value The signed integer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteSigned(Width, Value)
 	if not (Width and Value) then error("bad arguments in BitBuffer::WriteSigned (missing values)", 1) end
@@ -607,10 +623,10 @@ function BitBuffer:ReadSigned(Width)
 	return ((-1) ^ self.mBitBuffer[self.BitPointer]) * self:ReadUnsigned(Width - 1)
 end
 
--- Read / Write a string. May contain embedded nulls (string.char(0))
 --[[**
 	Writes a string to the BitBuffer.
 	@param [t:string] String The string you are writing to the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteString(String)
 	if type(String) ~= "string" then
@@ -693,6 +709,7 @@ end
 --[[**
 	Writes a boolean to the BitBuffer.
 	@param [t:boolean] Boolean The value you are writing to the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteBool(Boolean)
 	if type(Boolean) ~= "boolean" then
@@ -718,6 +735,7 @@ end
 	@param [t:integer] Fraction The number of bits (probably).
 	@param [t:integer] WriteExponent The number of bits for the decimal (probably).
 	@param [t:number] Float The actual number you are writing.
+	@returns [void]
 **--]]
 function BitBuffer:WriteFloat(Fraction, WriteExponent, Float)
 	if not (Fraction and WriteExponent and Float) then error("missing argument(s)", 1) end
@@ -772,6 +790,7 @@ end
 --[[**
 	Writes a float8 (quarter precision) to the BitBuffer.
 	@param [t:number] The float8.
+	@returns [void]
 **--]]
 function BitBuffer:WriteFloat8(Float)
 	self:WriteFloat(3, 4, Float)
@@ -794,6 +813,7 @@ end
 --[[**
 	Writes a float16 (half precision) to the BitBuffer.
 	@param [t:number] The float16.
+	@returns [void]
 **--]]
 function BitBuffer:WriteFloat16(Float)
 	self:WriteFloat(10, 5, Float)
@@ -816,6 +836,7 @@ end
 --[[**
 	Writes a float32 (single precision) to the BitBuffer.
 	@param [t:number] The float32.
+	@returns [void]
 **--]]
 function BitBuffer:WriteFloat32(Float)
 	self:WriteFloat(23, 8, Float)
@@ -838,6 +859,7 @@ end
 --[[**
 	Writes a float64 (double precision) to the BitBuffer.
 	@param [t:number] The float64.
+	@returns [void]
 **--]]
 function BitBuffer:WriteFloat64(Float)
 	self:WriteFloat(52, 11, Float)
@@ -862,6 +884,7 @@ end
 --[[**
 	[DEPRECATED] Writes a BrickColor to the BitBuffer.
 	@param [t:BrickColor] Color The BrickColor you are writing to the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteBrickColor(Color)
 	if typeof(Color) ~= "BrickColor" then
@@ -893,6 +916,7 @@ end
 --[[**
 	Writes the rotation part of a CFrame into the BitBuffer.
 	@param [t:CFrame] CoordinateFrame The CFrame you wish to write.
+	@returns [void]
 **--]]
 function BitBuffer:WriteRotation(CoordinateFrame)
 	if typeof(CoordinateFrame) ~= "CFrame" then
@@ -943,6 +967,7 @@ end
 --[[**
 	Writes a Color3 to the BitBuffer.
 	@param [t:Color3] Color The color you want to write into the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteColor3(Color)
 	if typeof(Color) ~= "Color3" then
@@ -968,6 +993,7 @@ end
 --[[**
 	Writes a Vector3 to the BitBuffer. Writes with Float32 precision.
 	@param [t:Vector3] Vector The vector you want to write into the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteVector3(Vector)
 	if typeof(Vector) ~= "Vector3" then
@@ -990,6 +1016,7 @@ end
 --[[**
 	Writes a full CFrame (position and rotation) to the BitBuffer. Uses Float64 precision.
 	@param [t:CFrame] CoordinateFrame The CFrame you are writing to the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteCFrame(CoordinateFrame)
 	if typeof(CoordinateFrame) ~= "CFrame" then
@@ -1011,6 +1038,7 @@ end
 --[[**
 	Writes a Vector2 to the BitBuffer. Writes with Float32 precision.
 	@param [t:Vector2] Vector The vector you want to write into the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteVector2(Vector)
 	if typeof(Vector) ~= "Vector2" then
@@ -1032,6 +1060,7 @@ end
 --[[**
 	Writes a UDim2 to the BitBuffer. Uses Float32 precision for the scale.
 	@param [t:UDim2] Value The UDim2 you are writing to the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteUDim2(Value)
 	if typeof(Value) ~= "UDim2" then
@@ -1055,6 +1084,7 @@ end
 --[[**
 	Writes a Vector3 to the BitBuffer. Writes with Float64 precision.
 	@param [t:Vector3] Vector The vector you want to write into the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteVector3Float64(Vector)
 	if typeof(Vector) ~= "Vector3" then
@@ -1077,6 +1107,7 @@ end
 --[[**
 	Writes a Vector2 to the BitBuffer. Writes with Float64 precision.
 	@param [t:Vector2] Vector The vector you want to write into the BitBuffer.
+	@returns [void]
 **--]]
 function BitBuffer:WriteVector2Float64(Vector)
 	if typeof(Vector) ~= "Vector2" then
@@ -1103,6 +1134,7 @@ BitBuffer.ReadVector2Float32 = BitBuffer.ReadVector2
 
 --[[**
 	Destroys the BitBuffer metatable.
+	@returns [void]
 **--]]
 function BitBuffer:Destroy()
 	self:Reset()
