@@ -6,7 +6,7 @@ This is currently the fastest BitBuffer for Roblox. It is around 65-75% faster t
 
 To use this BitBuffer, just copy the source of the [init.lua](https://github.com/howmanysmall/FastBitBuffer/blob/master/src/init.lua) file to a ModuleScript, and require it.
 
-![FastBitBuffer Setup](https://raw.githubusercontent.com/howmanysmall/FastBitBuffer/master/docs/FastBitBufferSetup.png)
+![FastBitBuffer Setup](https://raw.githubusercontent.com/howmanysmall/FastBitBuffer/master/documentation/FastBitBufferSetup.png)
 
 To actually use the BitBuffer, you need to use the following API.
 

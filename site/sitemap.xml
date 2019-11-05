@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+     <loc>https://howmanysmall.github.io/FastBitBuffer/</loc>
+     <lastmod>2019-11-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://howmanysmall.github.io/FastBitBuffer/guide/installation/</loc>
+     <lastmod>2019-11-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://howmanysmall.github.io/FastBitBuffer/guide/usage/</loc>
+     <lastmod>2019-11-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://howmanysmall.github.io/FastBitBuffer/guide/location/</loc>
+     <lastmod>2019-11-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://howmanysmall.github.io/FastBitBuffer/api/</loc>
+     <lastmod>2019-11-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+</urlset>

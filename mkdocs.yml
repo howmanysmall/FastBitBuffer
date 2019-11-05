@@ -1,0 +1,59 @@
+site_name: FastBitBuffer
+site_url: https://howmanysmall.github.io/FastBitBuffer
+site_description: The fastest way to compress data on Roblox.
+site_author: HowManySmall
+
+repo_name: howmanysmall/FastBitBuffer
+repo_url: https://github.com/howmanysmall/FastBitBuffer
+
+theme:
+    name: "material"
+    logo: "assets/images/BitBufferIcon.png"
+    favicon: "assets/images/BitBufferIcon.png"
+    language: "en"
+    palette:
+        primary: "purple"
+        accent: "light green"
+    font:
+        text: "Roboto"
+        code: "Roboto Mono"
+
+nav:
+    - Home: index.md
+    - Guide:
+        - Installation: guide/installation.md
+        - Usage: guide/usage.md
+        - "Example: Saving Locations": guide/location.md
+    - API: api.md
+
+extra_javascript:
+    - "docs/assets/javascript/jax.js"
+    - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"
+
+markdown_extensions:
+    - attr_list
+    - admonition
+    - codehilite:
+            guess_lang: false
+    - toc:
+            permalink: true
+    - def_list
+    - meta
+    - pymdownx.arithmatex
+    - pymdownx.betterem:
+            smart_enable: all
+    - pymdownx.caret
+    - pymdownx.critic
+    - pymdownx.details
+    - pymdownx.emoji:
+            emoji_generator: !!python/name:pymdownx.emoji.to_svg
+    - pymdownx.inlinehilite
+    - pymdownx.keys
+    - pymdownx.magiclink
+    - pymdownx.mark
+    - pymdownx.smartsymbols
+    - pymdownx.superfences
+    - pymdownx.tasklist:
+            custom_checkbox: true
+    - pymdownx.tilde
+    - footnotes

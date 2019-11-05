@@ -890,47 +890,18 @@ function BitBuffer:WriteRotation(CoordinateFrame)
 	local _, _, Roll = (WithoutRoll:Inverse() * CoordinateFrame):ToEulerAnglesXYZ()
 
 	-- Atan2 -> in the range [-pi, pi]
-	Azumith = ((Azumith / 3.1415926535898) * 2097151) + 0.5
+	Azumith = ((Azumith / 3.1415926535898) * (PowerOfTwo[21] - 1)) + 0.5
 	Azumith = Azumith - Azumith % 1
 
-	Roll = ((Roll / 3.1415926535898) * 1048575) + 0.5
+	Roll = ((Roll / 3.1415926535898) * (PowerOfTwo[20] - 1)) + 0.5
 	Roll = Roll - Roll % 1
 
-	Elevation = ((Elevation / 1.5707963267949) * 1048575) + 0.5
+	Elevation = ((Elevation / 1.5707963267949) * (PowerOfTwo[20] - 1)) + 0.5
 	Elevation = Elevation - Elevation % 1
 
-	if Azumith < 0 then
-		self.BitPointer = self.BitPointer + 1
-		self.mBitBuffer[self.BitPointer] = 1
-		Azumith = 0 - Azumith
-	else
-		self.BitPointer = self.BitPointer + 1
-		self.mBitBuffer[self.BitPointer] = 0
-	end
-
-	self:WriteUnsigned(21, Azumith)
-
-	if Roll < 0 then
-		self.BitPointer = self.BitPointer + 1
-		self.mBitBuffer[self.BitPointer] = 1
-		Roll = 0 - Roll
-	else
-		self.BitPointer = self.BitPointer + 1
-		self.mBitBuffer[self.BitPointer] = 0
-	end
-
-	self:WriteUnsigned(20, Roll)
-
-	if Elevation < 0 then
-		self.BitPointer = self.BitPointer + 1
-		self.mBitBuffer[self.BitPointer] = 1
-		Elevation = 0 - Elevation
-	else
-		self.BitPointer = self.BitPointer + 1
-		self.mBitBuffer[self.BitPointer] = 0
-	end
-
-	self:WriteUnsigned(20, Elevation)
+	self:WriteSigned(22, Azumith)
+	self:WriteSigned(21, Roll)
+	self:WriteSigned(21, Elevation)
 end
 
 --[[**
@@ -1020,6 +991,8 @@ end
 	@returns [t:CFrame] The CFrame you are reading from the BitBuffer.
 **--]]
 function BitBuffer:ReadCFrame()
+	local Position = CFrame.new(self:ReadVector3Float64())
+
 	local Azumith = self:ReadSigned(22)
 	local Roll = self:ReadSigned(21)
 	local Elevation = self:ReadSigned(21)
@@ -1032,7 +1005,7 @@ function BitBuffer:ReadCFrame()
 	Rotation = Rotation * CFrame.Angles(Elevation, 0, 0)
 	Rotation = Rotation * CFrame.Angles(0, 0, Roll)
 
-	return CFrame.new(self:ReadVector3Float64()) * Rotation
+	return Position * Rotation
 end
 
 --[[**
