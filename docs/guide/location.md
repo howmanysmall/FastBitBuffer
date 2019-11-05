@@ -43,14 +43,6 @@ local function BeforeSave(Deserialized)
 	return Serialized
 end
 
-local function AfterSave(Player)
-	return function()
-		if PlayerLocations[Player] then
-			PlayerLocations[Player] = nil
-		end
-	end
-end
-
 local function OnUpdate(Player)
 	return function(PlayerLocation)
 		PlayerLocations[Player] = PlayerLocation
@@ -75,7 +67,6 @@ local function PlayerAdded(Player)
 		PlayerLocation:BeforeInitialGet(BeforeInitialGet)
 		PlayerLocation:BeforeSave(BeforeSave)
 		PlayerLocation:OnUpdate(OnUpdate(Player))
-		PlayerLocation:AfterSave(AfterSave(Player))
 
 		local DefaultLocation = PlayerLocation:Get(DEFAULT_PLAYER_SPAWN_BASE64)
 		if type(DefaultLocation) == "string" then
