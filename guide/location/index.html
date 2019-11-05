@@ -339,83 +339,83 @@
 <span class="kd">local</span> <span class="n">DEFAULT_PLAYER_SPAWN_CFRAME</span> <span class="o">=</span> <span class="n">CFrame</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 <span class="kd">local</span> <span class="n">DEFAULT_PLAYER_SPAWN_BASE64</span> <span class="kr">do</span>
-    <span class="kd">local</span> <span class="n">BitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">WriteCFrame</span><span class="p">(</span><span class="n">DEFAULT_PLAYER_SPAWN_CFRAME</span><span class="p">)</span>
-    <span class="n">DEFAULT_PLAYER_SPAWN_BASE64</span> <span class="o">=</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">bitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">WriteCFrame</span><span class="p">(</span><span class="n">DEFAULT_PLAYER_SPAWN_CFRAME</span><span class="p">)</span>
+    <span class="n">DEFAULT_PLAYER_SPAWN_BASE64</span> <span class="o">=</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">()</span>
 
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
-    <span class="n">BitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+    <span class="n">bitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="n">PlayerLocations</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="kd">local</span> <span class="n">playerLocations</span> <span class="o">=</span> <span class="p">{}</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">BeforeInitialGet</span><span class="p">(</span><span class="n">Serialized</span><span class="p">)</span>
-    <span class="kd">local</span> <span class="n">BitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">FromBase64</span><span class="p">(</span><span class="n">Serialized</span><span class="p">)</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">beforeInitialGet</span><span class="p">(</span><span class="n">serialized</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">bitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">FromBase64</span><span class="p">(</span><span class="n">serialized</span><span class="p">)</span>
 
-    <span class="kd">local</span> <span class="n">Deserialized</span> <span class="o">=</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ReadCFrame</span><span class="p">()</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
-    <span class="n">BitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="kd">local</span> <span class="n">deserialized</span> <span class="o">=</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ReadCFrame</span><span class="p">()</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+    <span class="n">bitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
 
-    <span class="kr">return</span> <span class="n">Deserialized</span>
+    <span class="kr">return</span> <span class="n">deserialized</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">BeforeSave</span><span class="p">(</span><span class="n">Deserialized</span><span class="p">)</span>
-    <span class="kd">local</span> <span class="n">BitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">WriteCFrame</span><span class="p">(</span><span class="n">Deserialized</span><span class="p">)</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">beforeSave</span><span class="p">(</span><span class="n">deserialized</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">bitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">WriteCFrame</span><span class="p">(</span><span class="n">deserialized</span><span class="p">)</span>
 
-    <span class="kd">local</span> <span class="n">Serialized</span> <span class="o">=</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">()</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
-    <span class="n">BitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="kd">local</span> <span class="n">serialized</span> <span class="o">=</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">()</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+    <span class="n">bitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
 
-    <span class="kr">return</span> <span class="n">Serialized</span>
+    <span class="kr">return</span> <span class="n">serialized</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">OnUpdate</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kr">return</span> <span class="kr">function</span><span class="p">(</span><span class="n">PlayerLocation</span><span class="p">)</span>
-        <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="o">=</span> <span class="n">PlayerLocation</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">onUpdate</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+    <span class="kr">return</span> <span class="kr">function</span><span class="p">(</span><span class="n">playerLocation</span><span class="p">)</span>
+        <span class="n">playerLocations</span><span class="p">[</span><span class="n">player</span><span class="p">]</span> <span class="o">=</span> <span class="n">playerLocation</span>
     <span class="kr">end</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">CharacterRemoving</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kr">return</span> <span class="kr">function</span><span class="p">(</span><span class="n">Character</span><span class="p">)</span>
-        <span class="kd">local</span> <span class="n">Humanoid</span> <span class="o">=</span> <span class="n">Character</span><span class="p">:</span><span class="n">FindFirstChildOfClass</span><span class="p">(</span><span class="s2">&quot;Humanoid&quot;</span><span class="p">)</span>
-        <span class="kr">if</span> <span class="n">Humanoid</span> <span class="ow">and</span> <span class="n">Humanoid</span><span class="p">.</span><span class="n">Health</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="kr">then</span>
-            <span class="kd">local</span> <span class="n">PlayerLocation</span> <span class="o">=</span> <span class="n">DataStore2</span><span class="p">(</span><span class="n">DATA_STORE_NAME</span><span class="p">,</span> <span class="n">Player</span><span class="p">)</span>
-            <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">Set</span><span class="p">(</span><span class="n">Character</span><span class="p">:</span><span class="n">GetPrimaryPartCFrame</span><span class="p">())</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">characterRemoving</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+    <span class="kr">return</span> <span class="kr">function</span><span class="p">(</span><span class="n">character</span><span class="p">)</span>
+        <span class="kd">local</span> <span class="n">humanoid</span> <span class="o">=</span> <span class="n">character</span><span class="p">:</span><span class="n">FindFirstChildOfClass</span><span class="p">(</span><span class="s2">&quot;Humanoid&quot;</span><span class="p">)</span>
+        <span class="kr">if</span> <span class="n">humanoid</span> <span class="ow">and</span> <span class="n">humanoid</span><span class="p">.</span><span class="n">Health</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="kr">then</span>
+            <span class="kd">local</span> <span class="n">playerLocation</span> <span class="o">=</span> <span class="n">DataStore2</span><span class="p">(</span><span class="n">DATA_STORE_NAME</span><span class="p">,</span> <span class="n">player</span><span class="p">)</span>
+            <span class="n">playerLocation</span><span class="p">:</span><span class="n">Set</span><span class="p">(</span><span class="n">character</span><span class="p">:</span><span class="n">GetPrimaryPartCFrame</span><span class="p">())</span>
         <span class="kr">end</span>
     <span class="kr">end</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">PlayerAdded</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kr">if</span> <span class="ow">not</span> <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="kr">then</span>
-        <span class="n">Player</span><span class="p">.</span><span class="n">CharacterRemoving</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">CharacterRemoving</span><span class="p">(</span><span class="n">Player</span><span class="p">))</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">playerAdded</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="ow">not</span> <span class="n">playerLocations</span><span class="p">[</span><span class="n">player</span><span class="p">]</span> <span class="kr">then</span>
+        <span class="n">player</span><span class="p">.</span><span class="n">CharacterRemoving</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">characterRemoving</span><span class="p">(</span><span class="n">player</span><span class="p">))</span>
 
-        <span class="kd">local</span> <span class="n">PlayerLocation</span> <span class="o">=</span> <span class="n">DataStore2</span><span class="p">(</span><span class="n">DATA_STORE_NAME</span><span class="p">,</span> <span class="n">Player</span><span class="p">)</span>
-        <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">BeforeInitialGet</span><span class="p">(</span><span class="n">BeforeInitialGet</span><span class="p">)</span>
-        <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">BeforeSave</span><span class="p">(</span><span class="n">BeforeSave</span><span class="p">)</span>
-        <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">OnUpdate</span><span class="p">(</span><span class="n">OnUpdate</span><span class="p">(</span><span class="n">Player</span><span class="p">))</span>
+        <span class="kd">local</span> <span class="n">playerLocation</span> <span class="o">=</span> <span class="n">DataStore2</span><span class="p">(</span><span class="n">DATA_STORE_NAME</span><span class="p">,</span> <span class="n">player</span><span class="p">)</span>
+        <span class="n">playerLocation</span><span class="p">:</span><span class="n">BeforeInitialGet</span><span class="p">(</span><span class="n">beforeInitialGet</span><span class="p">)</span>
+        <span class="n">playerLocation</span><span class="p">:</span><span class="n">BeforeSave</span><span class="p">(</span><span class="n">beforeSave</span><span class="p">)</span>
+        <span class="n">playerLocation</span><span class="p">:</span><span class="n">OnUpdate</span><span class="p">(</span><span class="n">onUpdate</span><span class="p">(</span><span class="n">player</span><span class="p">))</span>
 
-        <span class="kd">local</span> <span class="n">DefaultLocation</span> <span class="o">=</span> <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">Get</span><span class="p">(</span><span class="n">DEFAULT_PLAYER_SPAWN_BASE64</span><span class="p">)</span>
-        <span class="kr">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">DefaultLocation</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span> <span class="kr">then</span>
-            <span class="n">DefaultLocation</span> <span class="o">=</span> <span class="n">BeforeInitialGet</span><span class="p">(</span><span class="n">DefaultLocation</span><span class="p">)</span>
+        <span class="kd">local</span> <span class="n">defaultLocation</span> <span class="o">=</span> <span class="n">playerLocation</span><span class="p">:</span><span class="n">Get</span><span class="p">(</span><span class="n">DEFAULT_PLAYER_SPAWN_BASE64</span><span class="p">)</span>
+        <span class="kr">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">defaultLocation</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span> <span class="kr">then</span>
+            <span class="n">defaultLocation</span> <span class="o">=</span> <span class="n">beforeInitialGet</span><span class="p">(</span><span class="n">defaultLocation</span><span class="p">)</span>
         <span class="kr">end</span>
 
-        <span class="kd">local</span> <span class="n">Character</span> <span class="o">=</span> <span class="n">Player</span><span class="p">.</span><span class="n">Character</span> <span class="ow">or</span> <span class="n">Player</span><span class="p">.</span><span class="n">CharacterAdded</span><span class="p">:</span><span class="n">Wait</span><span class="p">()</span>
-        <span class="n">Character</span><span class="p">:</span><span class="n">WaitForChild</span><span class="p">(</span><span class="s2">&quot;HumanoidRootPart&quot;</span><span class="p">)</span>
-        <span class="n">Character</span><span class="p">:</span><span class="n">SetPrimaryPartCFrame</span><span class="p">(</span><span class="n">DefaultLocation</span> <span class="o">+</span> <span class="n">RAISED_VECTOR3</span><span class="p">)</span>
+        <span class="kd">local</span> <span class="n">character</span> <span class="o">=</span> <span class="n">player</span><span class="p">.</span><span class="n">Character</span> <span class="ow">or</span> <span class="n">player</span><span class="p">.</span><span class="n">CharacterAdded</span><span class="p">:</span><span class="n">Wait</span><span class="p">()</span>
+        <span class="n">character</span><span class="p">:</span><span class="n">WaitForChild</span><span class="p">(</span><span class="s2">&quot;HumanoidRootPart&quot;</span><span class="p">)</span>
+        <span class="n">character</span><span class="p">:</span><span class="n">SetPrimaryPartCFrame</span><span class="p">(</span><span class="n">defaultLocation</span> <span class="o">+</span> <span class="n">RAISED_VECTOR3</span><span class="p">)</span>
     <span class="kr">end</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">PlayerRemoving</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kr">if</span> <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="kr">then</span>
-        <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">playerRemoving</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">playerLocations</span><span class="p">[</span><span class="n">player</span><span class="p">]</span> <span class="kr">then</span>
+        <span class="n">playerLocations</span><span class="p">[</span><span class="n">player</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
     <span class="kr">end</span>
 <span class="kr">end</span>
 
-<span class="n">Players</span><span class="p">.</span><span class="n">PlayerAdded</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">PlayerAdded</span><span class="p">)</span>
-<span class="n">Players</span><span class="p">.</span><span class="n">PlayerRemoving</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">PlayerRemoving</span><span class="p">)</span>
-<span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">Player</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">Players</span><span class="p">:</span><span class="n">GetPlayers</span><span class="p">())</span> <span class="kr">do</span> <span class="n">PlayerAdded</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span> <span class="kr">end</span>
+<span class="n">Players</span><span class="p">.</span><span class="n">PlayerAdded</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">playerAdded</span><span class="p">)</span>
+<span class="n">Players</span><span class="p">.</span><span class="n">PlayerRemoving</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">playerRemoving</span><span class="p">)</span>
+<span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">player</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">Players</span><span class="p">:</span><span class="n">GetPlayers</span><span class="p">())</span> <span class="kr">do</span> <span class="n">playerAdded</span><span class="p">(</span><span class="n">player</span><span class="p">)</span> <span class="kr">end</span>
 </pre></div>
                 
                   

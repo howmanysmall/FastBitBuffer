@@ -335,10 +335,10 @@
 <li>If they don't have it, create a new BitBuffer.</li>
 <li>After the BitBuffer is created, check if they have any data saved on the DataStore. If they don't have any, set their data to the default created at the start of the script.</li>
 <li>Loads their data from the Base64 string that is stored in the DataStore using <code>FromBase64</code>.</li>
-<li>Create the Leaderstats using the <code>LoadFromBitBuffer</code>, which reads the Color3 first, and then the unsigned number second because that's what order they are stored in.</li>
-<li>Parents the Leaderstats returned by <code>LoadFromBitBuffer</code> to the Player.</li>
+<li>Create the Leaderstats using the <code>loadFromBitBuffer</code>, which reads the Color3 first, and then the unsigned number second because that's what order they are stored in.</li>
+<li>Parents the Leaderstats returned by <code>loadFromBitBuffer</code> to the Player.</li>
 <li>When the player leaves, check if they have Leaderstats. If they do, create a new BitBuffer.</li>
-<li>Run the <code>SaveToBitBuffer</code> function, which calls <code>WriteColor3</code> first followed by <code>WriteUnsigned</code>.</li>
+<li>Run the <code>saveToBitBuffer</code> function, which calls <code>WriteColor3</code> first followed by <code>WriteUnsigned</code>.</li>
 <li>Sets the new data using <code>SetAsync</code> and <code>ToBase64</code>. Once that is complete, we call <code>Destroy</code> on the BitBuffer and set it to nil.</li>
 </ul>
 <div class="admonition important">
@@ -358,80 +358,80 @@
 <span class="kd">local</span> <span class="n">TOTAL_STAGES</span> <span class="o">=</span> <span class="mi">400</span>
 <span class="kd">local</span> <span class="n">BITS_REQUIRED</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">BitsRequired</span><span class="p">(</span><span class="n">TOTAL_STAGES</span><span class="p">)</span>
 <span class="kd">local</span> <span class="n">DEFAULT_DATA</span> <span class="kr">do</span>
-    <span class="kd">local</span> <span class="n">BitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">WriteColor3</span><span class="p">(</span><span class="n">Color3</span><span class="p">.</span><span class="n">new</span><span class="p">())</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">WriteUnsigned</span><span class="p">(</span><span class="n">BITS_REQUIRED</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">DEFAULT_DATA</span> <span class="o">=</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">bitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">WriteColor3</span><span class="p">(</span><span class="n">Color3</span><span class="p">.</span><span class="n">new</span><span class="p">())</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">WriteUnsigned</span><span class="p">(</span><span class="n">BITS_REQUIRED</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">DEFAULT_DATA</span> <span class="o">=</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">()</span>
 
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
-    <span class="n">BitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+    <span class="n">bitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="n">GameDataStore</span> <span class="o">=</span> <span class="n">DataStoreService</span><span class="p">:</span><span class="n">GetDataStore</span><span class="p">(</span><span class="s2">&quot;GameDataStore&quot;</span><span class="p">)</span>
+<span class="kd">local</span> <span class="n">gameDataStore</span> <span class="o">=</span> <span class="n">DataStoreService</span><span class="p">:</span><span class="n">GetDataStore</span><span class="p">(</span><span class="s2">&quot;GameDataStore&quot;</span><span class="p">)</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">SaveToBitBuffer</span><span class="p">(</span><span class="n">BitBuffer</span><span class="p">,</span> <span class="n">Leaderstats</span><span class="p">)</span>
-    <span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">ValueName</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">USER_DATA</span><span class="p">)</span> <span class="kr">do</span>
-        <span class="nb">assert</span><span class="p">(</span><span class="n">Leaderstats</span><span class="p">:</span><span class="n">FindFirstChild</span><span class="p">(</span><span class="n">ValueName</span><span class="p">),</span> <span class="nb">string.format</span><span class="p">(</span><span class="s2">&quot;Expected ValueObject %s to exist but it doesn&#39;t.&quot;</span><span class="p">,</span> <span class="n">ValueName</span><span class="p">))</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">saveToBitBuffer</span><span class="p">(</span><span class="n">bitBuffer</span><span class="p">,</span> <span class="n">leaderstats</span><span class="p">)</span>
+    <span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">valueName</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">USER_DATA</span><span class="p">)</span> <span class="kr">do</span>
+        <span class="nb">assert</span><span class="p">(</span><span class="n">leaderstats</span><span class="p">:</span><span class="n">FindFirstChild</span><span class="p">(</span><span class="n">valueName</span><span class="p">),</span> <span class="nb">string.format</span><span class="p">(</span><span class="s2">&quot;Expected ValueObject %s to exist but it doesn&#39;t.&quot;</span><span class="p">,</span> <span class="n">valueName</span><span class="p">))</span>
     <span class="kr">end</span>
 
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">WriteColor3</span><span class="p">(</span><span class="n">Leaderstats</span><span class="p">.</span><span class="n">FavoriteColor</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span>
-    <span class="n">BitBuffer</span><span class="p">:</span><span class="n">WriteUnsigned</span><span class="p">(</span><span class="n">BITS_REQUIRED</span><span class="p">,</span> <span class="n">Leaderstats</span><span class="p">.</span><span class="n">Stage</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">WriteColor3</span><span class="p">(</span><span class="n">leaderstats</span><span class="p">.</span><span class="n">favoriteColor</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span>
+    <span class="n">bitBuffer</span><span class="p">:</span><span class="n">WriteUnsigned</span><span class="p">(</span><span class="n">BITS_REQUIRED</span><span class="p">,</span> <span class="n">leaderstats</span><span class="p">.</span><span class="n">Stage</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">LoadFromBitBuffer</span><span class="p">(</span><span class="n">BitBuffer</span><span class="p">)</span>
-    <span class="kd">local</span> <span class="n">Leaderstats</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Folder&quot;</span><span class="p">)</span>
-    <span class="n">Leaderstats</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;Leaderstats&quot;</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">loadFromBitBuffer</span><span class="p">(</span><span class="n">bitBuffer</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">leaderstats</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Folder&quot;</span><span class="p">)</span>
+    <span class="n">leaderstats</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;Leaderstats&quot;</span>
 
-    <span class="kd">local</span> <span class="n">FavoriteColor</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Color3Value&quot;</span><span class="p">)</span>
-    <span class="n">FavoriteColor</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;FavoriteColor&quot;</span>
-    <span class="n">FavoriteColor</span><span class="p">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ReadColor3</span><span class="p">()</span>
-    <span class="n">FavoriteColor</span><span class="p">.</span><span class="n">Parent</span> <span class="o">=</span> <span class="n">Leaderstats</span>
+    <span class="kd">local</span> <span class="n">favoriteColor</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Color3Value&quot;</span><span class="p">)</span>
+    <span class="n">favoriteColor</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;FavoriteColor&quot;</span>
+    <span class="n">favoriteColor</span><span class="p">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ReadColor3</span><span class="p">()</span>
+    <span class="n">favoriteColor</span><span class="p">.</span><span class="n">Parent</span> <span class="o">=</span> <span class="n">leaderstats</span>
 
-    <span class="kd">local</span> <span class="n">Stage</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;IntValue&quot;</span><span class="p">)</span>
-    <span class="n">Stage</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;Stage&quot;</span>
-    <span class="n">Stage</span><span class="p">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ReadUnsigned</span><span class="p">(</span><span class="n">BITS_REQUIRED</span><span class="p">)</span>
-    <span class="n">Stage</span><span class="p">.</span><span class="n">Parent</span> <span class="o">=</span> <span class="n">Leaderstats</span>
+    <span class="kd">local</span> <span class="n">stage</span> <span class="o">=</span> <span class="n">Instance</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;IntValue&quot;</span><span class="p">)</span>
+    <span class="n">stage</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;Stage&quot;</span>
+    <span class="n">stage</span><span class="p">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ReadUnsigned</span><span class="p">(</span><span class="n">BITS_REQUIRED</span><span class="p">)</span>
+    <span class="n">stage</span><span class="p">.</span><span class="n">Parent</span> <span class="o">=</span> <span class="n">leaderstats</span>
 
-    <span class="kr">return</span> <span class="n">Leaderstats</span>
+    <span class="kr">return</span> <span class="n">leaderstats</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">PlayerAdded</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kr">if</span> <span class="ow">not</span> <span class="n">Player</span><span class="p">:</span><span class="n">FindFirstChild</span><span class="p">(</span><span class="s2">&quot;Leaderstats&quot;</span><span class="p">)</span> <span class="kr">then</span>
-        <span class="kd">local</span> <span class="n">BitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
-        <span class="kd">local</span> <span class="n">Success</span><span class="p">,</span> <span class="n">PlayerData</span> <span class="o">=</span> <span class="nb">pcall</span><span class="p">(</span><span class="n">GameDataStore</span><span class="p">.</span><span class="n">GetAsync</span><span class="p">,</span> <span class="n">GameDataStore</span><span class="p">,</span> <span class="n">Player</span><span class="p">.</span><span class="n">UserId</span><span class="p">)</span>
-        <span class="kr">if</span> <span class="n">Success</span> <span class="kr">then</span>
-            <span class="kr">if</span> <span class="ow">not</span> <span class="n">PlayerData</span> <span class="kr">then</span>
-                <span class="n">PlayerData</span> <span class="o">=</span> <span class="n">DEFAULT_DATA</span>
-                <span class="nb">pcall</span><span class="p">(</span><span class="n">GameDataStore</span><span class="p">.</span><span class="n">SetAsync</span><span class="p">,</span> <span class="n">GameDataStore</span><span class="p">,</span> <span class="n">Player</span><span class="p">.</span><span class="n">UserId</span><span class="p">,</span> <span class="n">PlayerData</span><span class="p">)</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">playerAdded</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="ow">not</span> <span class="n">player</span><span class="p">:</span><span class="n">FindFirstChild</span><span class="p">(</span><span class="s2">&quot;Leaderstats&quot;</span><span class="p">)</span> <span class="kr">then</span>
+        <span class="kd">local</span> <span class="n">bitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+        <span class="kd">local</span> <span class="n">success</span><span class="p">,</span> <span class="n">playerData</span> <span class="o">=</span> <span class="nb">pcall</span><span class="p">(</span><span class="n">gameDataStore</span><span class="p">.</span><span class="n">GetAsync</span><span class="p">,</span> <span class="n">gameDataStore</span><span class="p">,</span> <span class="n">player</span><span class="p">.</span><span class="n">UserId</span><span class="p">)</span>
+        <span class="kr">if</span> <span class="n">success</span> <span class="kr">then</span>
+            <span class="kr">if</span> <span class="ow">not</span> <span class="n">playerData</span> <span class="kr">then</span>
+                <span class="n">playerData</span> <span class="o">=</span> <span class="n">DEFAULT_DATA</span>
+                <span class="nb">pcall</span><span class="p">(</span><span class="n">gameDataStore</span><span class="p">.</span><span class="n">SetAsync</span><span class="p">,</span> <span class="n">gameDataStore</span><span class="p">,</span> <span class="n">player</span><span class="p">.</span><span class="n">UserId</span><span class="p">,</span> <span class="n">playerData</span><span class="p">)</span>
             <span class="kr">end</span>
 
-            <span class="n">BitBuffer</span><span class="p">:</span><span class="n">FromBase64</span><span class="p">(</span><span class="n">PlayerData</span><span class="p">)</span>
+            <span class="n">bitBuffer</span><span class="p">:</span><span class="n">FromBase64</span><span class="p">(</span><span class="n">playerData</span><span class="p">)</span>
 
-            <span class="kd">local</span> <span class="n">Leaderstats</span> <span class="o">=</span> <span class="n">LoadFromBitBuffer</span><span class="p">(</span><span class="n">BitBuffer</span><span class="p">)</span>
-            <span class="n">Leaderstats</span><span class="p">.</span><span class="n">Parent</span> <span class="o">=</span> <span class="n">Player</span>
+            <span class="kd">local</span> <span class="n">leaderstats</span> <span class="o">=</span> <span class="n">loadFromBitBuffer</span><span class="p">(</span><span class="n">bitBuffer</span><span class="p">)</span>
+            <span class="n">leaderstats</span><span class="p">.</span><span class="n">Parent</span> <span class="o">=</span> <span class="n">player</span>
 
-            <span class="n">BitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
-            <span class="n">BitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
+            <span class="n">bitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+            <span class="n">bitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
         <span class="kr">end</span>
     <span class="kr">end</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">PlayerRemoving</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kd">local</span> <span class="n">Leaderstats</span> <span class="o">=</span> <span class="n">Player</span><span class="p">:</span><span class="n">FindFirstChild</span><span class="p">(</span><span class="s2">&quot;Leaderstats&quot;</span><span class="p">)</span>
-    <span class="kr">if</span> <span class="n">Leaderstats</span> <span class="kr">then</span>
-        <span class="kd">local</span> <span class="n">BitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
-        <span class="n">SaveToBitBuffer</span><span class="p">(</span><span class="n">BitBuffer</span><span class="p">,</span> <span class="n">Leaderstats</span><span class="p">)</span>
-        <span class="kd">local</span> <span class="n">Success</span><span class="p">,</span> <span class="n">Error</span> <span class="o">=</span> <span class="nb">pcall</span><span class="p">(</span><span class="n">GameDataStore</span><span class="p">.</span><span class="n">SetAsync</span><span class="p">,</span> <span class="n">GameDataStore</span><span class="p">,</span> <span class="n">Player</span><span class="p">.</span><span class="n">UserId</span><span class="p">,</span> <span class="n">BitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">())</span>
-        <span class="kr">if</span> <span class="ow">not</span> <span class="n">Success</span> <span class="ow">and</span> <span class="n">Error</span> <span class="kr">then</span> <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Failed to save PlayerData!&quot;</span><span class="p">,</span> <span class="n">Error</span><span class="p">)</span> <span class="kr">end</span>
+<span class="kd">local</span> <span class="kr">function</span> <span class="nf">playerRemoving</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">leaderstats</span> <span class="o">=</span> <span class="n">player</span><span class="p">:</span><span class="n">FindFirstChild</span><span class="p">(</span><span class="s2">&quot;Leaderstats&quot;</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">leaderstats</span> <span class="kr">then</span>
+        <span class="kd">local</span> <span class="n">bitBuffer</span> <span class="o">=</span> <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">new</span><span class="p">()</span>
+        <span class="n">saveToBitBuffer</span><span class="p">(</span><span class="n">bitBuffer</span><span class="p">,</span> <span class="n">leaderstats</span><span class="p">)</span>
+        <span class="kd">local</span> <span class="n">success</span><span class="p">,</span> <span class="nb">error</span> <span class="o">=</span> <span class="nb">pcall</span><span class="p">(</span><span class="n">gameDataStore</span><span class="p">.</span><span class="n">SetAsync</span><span class="p">,</span> <span class="n">gameDataStore</span><span class="p">,</span> <span class="n">player</span><span class="p">.</span><span class="n">UserId</span><span class="p">,</span> <span class="n">bitBuffer</span><span class="p">:</span><span class="n">ToBase64</span><span class="p">())</span>
+        <span class="kr">if</span> <span class="ow">not</span> <span class="n">success</span> <span class="ow">and</span> <span class="nb">error</span> <span class="kr">then</span> <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Failed to save PlayerData!&quot;</span><span class="p">,</span> <span class="nb">error</span><span class="p">)</span> <span class="kr">end</span>
 
-        <span class="n">BitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
-        <span class="n">BitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
+        <span class="n">bitBuffer</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+        <span class="n">bitBuffer</span> <span class="o">=</span> <span class="kc">nil</span>
     <span class="kr">end</span>
 <span class="kr">end</span>
 
-<span class="n">Players</span><span class="p">.</span><span class="n">PlayerAdded</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">PlayerAdded</span><span class="p">)</span>
-<span class="n">Players</span><span class="p">.</span><span class="n">PlayerRemoving</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">PlayerRemoving</span><span class="p">)</span>
-<span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">Player</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">Players</span><span class="p">:</span><span class="n">GetPlayers</span><span class="p">())</span> <span class="kr">do</span> <span class="n">PlayerAdded</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span> <span class="kr">end</span>
+<span class="n">Players</span><span class="p">.</span><span class="n">PlayerAdded</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">playerAdded</span><span class="p">)</span>
+<span class="n">Players</span><span class="p">.</span><span class="n">PlayerRemoving</span><span class="p">:</span><span class="n">Connect</span><span class="p">(</span><span class="n">playerRemoving</span><span class="p">)</span>
+<span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">player</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">Players</span><span class="p">:</span><span class="n">GetPlayers</span><span class="p">())</span> <span class="kr">do</span> <span class="n">playerAdded</span><span class="p">(</span><span class="n">player</span><span class="p">)</span> <span class="kr">end</span>
 </pre></div>
                 
                   

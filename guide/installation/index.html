@@ -331,8 +331,8 @@
                 <p>There's really only one way to install this module. I recommend that you put it in your <code>ServerStorage</code>, as it's the perfect place for storing ModuleScripts, and it's only meant for use on the server.</p>
 <p>To install, just run this in your Studio command line.</p>
 <div class="codehilite"><pre><span></span><span class="kd">local</span> <span class="n">ServerStorage</span> <span class="o">=</span> <span class="n">game</span><span class="p">:</span><span class="n">GetService</span><span class="p">(</span><span class="s2">&quot;ServerStorage&quot;</span><span class="p">)</span>
-<span class="kd">local</span> <span class="n">Installer</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="mi">4300858244</span><span class="p">)</span>
-<span class="kd">local</span> <span class="n">FastBitBuffer</span> <span class="o">=</span> <span class="n">Installer</span><span class="p">:</span><span class="n">Install</span><span class="p">(</span><span class="s2">&quot;https://github.com/howmanysmall/FastBitBuffer/tree/master/src&quot;</span><span class="p">,</span> <span class="n">ServerStorage</span><span class="p">)</span>
+<span class="kd">local</span> <span class="n">installer</span> <span class="o">=</span> <span class="nb">require</span><span class="p">(</span><span class="mi">4300858244</span><span class="p">)</span>
+<span class="kd">local</span> <span class="n">FastBitBuffer</span> <span class="o">=</span> <span class="n">installer</span><span class="p">:</span><span class="n">Install</span><span class="p">(</span><span class="s2">&quot;https://github.com/howmanysmall/FastBitBuffer/tree/master/src&quot;</span><span class="p">,</span> <span class="n">ServerStorage</span><span class="p">)</span>
 <span class="n">FastBitBuffer</span><span class="p">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s2">&quot;FastBitBuffer&quot;</span>
 </pre></div>
                 
