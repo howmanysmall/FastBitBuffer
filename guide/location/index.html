@@ -371,14 +371,6 @@
     <span class="kr">return</span> <span class="n">Serialized</span>
 <span class="kr">end</span>
 
-<span class="kd">local</span> <span class="kr">function</span> <span class="nf">AfterSave</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
-    <span class="kr">return</span> <span class="kr">function</span><span class="p">()</span>
-        <span class="kr">if</span> <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="kr">then</span>
-            <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
-        <span class="kr">end</span>
-    <span class="kr">end</span>
-<span class="kr">end</span>
-
 <span class="kd">local</span> <span class="kr">function</span> <span class="nf">OnUpdate</span><span class="p">(</span><span class="n">Player</span><span class="p">)</span>
     <span class="kr">return</span> <span class="kr">function</span><span class="p">(</span><span class="n">PlayerLocation</span><span class="p">)</span>
         <span class="n">PlayerLocations</span><span class="p">[</span><span class="n">Player</span><span class="p">]</span> <span class="o">=</span> <span class="n">PlayerLocation</span>
@@ -403,7 +395,6 @@
         <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">BeforeInitialGet</span><span class="p">(</span><span class="n">BeforeInitialGet</span><span class="p">)</span>
         <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">BeforeSave</span><span class="p">(</span><span class="n">BeforeSave</span><span class="p">)</span>
         <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">OnUpdate</span><span class="p">(</span><span class="n">OnUpdate</span><span class="p">(</span><span class="n">Player</span><span class="p">))</span>
-        <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">AfterSave</span><span class="p">(</span><span class="n">AfterSave</span><span class="p">(</span><span class="n">Player</span><span class="p">))</span>
 
         <span class="kd">local</span> <span class="n">DefaultLocation</span> <span class="o">=</span> <span class="n">PlayerLocation</span><span class="p">:</span><span class="n">Get</span><span class="p">(</span><span class="n">DEFAULT_PLAYER_SPAWN_BASE64</span><span class="p">)</span>
         <span class="kr">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">DefaultLocation</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;string&quot;</span> <span class="kr">then</span>
