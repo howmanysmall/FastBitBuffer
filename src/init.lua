@@ -885,18 +885,18 @@ function BitBuffer:WriteRotation(CoordinateFrame)
 
 	local LookVector = CoordinateFrame.LookVector
 	local Azumith = math.atan2(-LookVector.X, -LookVector.Z)
-	local Elevation = math.atan2(LookVector.Y, (LookVector.X * LookVector.X + LookVector.Z * LookVector.Z) ^ 0.5)
+	local Elevation = math.atan2(LookVector.Y, math.sqrt(LookVector.X * LookVector.X + LookVector.Z * LookVector.Z))
 	local WithoutRoll = CFrame.new(CoordinateFrame.Position) * CFrame.Angles(0, Azumith, 0) * CFrame.Angles(Elevation, 0, 0)
 	local _, _, Roll = (WithoutRoll:Inverse() * CoordinateFrame):ToEulerAnglesXYZ()
 
 	-- Atan2 -> in the range [-pi, pi]
-	Azumith = ((Azumith / 3.1415926535898) * (PowerOfTwo[21] - 1)) + 0.5
+	Azumith = ((Azumith / 3.1415926535898) * 2097151) + 0.5
 	Azumith = Azumith - Azumith % 1
 
-	Roll = ((Roll / 3.1415926535898) * (PowerOfTwo[20] - 1)) + 0.5
+	Roll = ((Roll / 3.1415926535898) * 1048575) + 0.5
 	Roll = Roll - Roll % 1
 
-	Elevation = ((Elevation / 1.5707963267949) * (PowerOfTwo[20] - 1)) + 0.5
+	Elevation = ((Elevation / 1.5707963267949) * 1048575) + 0.5
 	Elevation = Elevation - Elevation % 1
 
 	self:WriteSigned(22, Azumith)
@@ -913,9 +913,9 @@ function BitBuffer:ReadRotation()
 	local Roll = self:ReadSigned(21)
 	local Elevation = self:ReadSigned(21)
 
-	Azumith = 3.1415926535898 * (Azumith / (PowerOfTwo[21] - 1))
-	Roll = 3.1415926535898 * (Roll / (PowerOfTwo[20] - 1))
-	Elevation = 3.1415926535898 * (Elevation / (PowerOfTwo[20] - 1))
+	Azumith = 3.1415926535898 * (Azumith / 2097151)
+	Roll = 3.1415926535898 * (Roll / 1048575)
+	Elevation = 3.1415926535898 * (Elevation / 1048575)
 
 	local Rotation = CFrame.Angles(0, Azumith, 0)
 	Rotation = Rotation * CFrame.Angles(Elevation, 0, 0)
@@ -997,9 +997,9 @@ function BitBuffer:ReadCFrame()
 	local Roll = self:ReadSigned(21)
 	local Elevation = self:ReadSigned(21)
 
-	Azumith = 3.1415926535898 * (Azumith / (PowerOfTwo[21] - 1))
-	Roll = 3.1415926535898 * (Roll / (PowerOfTwo[20] - 1))
-	Elevation = 3.1415926535898 * (Elevation / (PowerOfTwo[20] - 1))
+	Azumith = 3.1415926535898 * (Azumith / 2097151)
+	Roll = 3.1415926535898 * (Roll / 1048575)
+	Elevation = 3.1415926535898 * (Elevation / 1048575)
 
 	local Rotation = CFrame.Angles(0, Azumith, 0)
 	Rotation = Rotation * CFrame.Angles(Elevation, 0, 0)
