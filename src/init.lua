@@ -1,5 +1,4 @@
 --[[
-
 Differences from the original:
 	Using metatables instead of a function returning a table.
 	Added Vector3, Color3, Vector2, and UDim2 support.
@@ -183,9 +182,13 @@ Example Usage:
 
 -- This is quite possibly the fastest BitBuffer module.
 
+-- To-do: Remove `self:` calls, they're slow.
+
 local BitBuffer = {
 	ClassName = "BitBuffer";
-	__tostring = function() return "BitBuffer" end;
+	__tostring = function()
+		return "BitBuffer"
+	end;
 }
 
 BitBuffer.__index = BitBuffer
@@ -196,8 +199,10 @@ local DEPRECATED_WARNING = true
 local DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 local function ToBase(Number, Base)
-	Number = Number - Number % 1
-	if not Base or Base == 10 then return tostring(Number) end
+	Number = math.floor(Number)
+	if not Base or Base == 10 then
+		return tostring(Number)
+	end
 
 	local Array = {}
 	local Sign = ""
@@ -208,8 +213,7 @@ local function ToBase(Number, Base)
 
 	repeat
 		local Index = (Number % Base) + 1
-		Number = Number / Base
-		Number = Number - Number % 1
+		Number = math.floor(Number / Base)
 		table.insert(Array, 1, string.sub(DIGITS, Index, Index))
 	until Number == 0
 
@@ -236,7 +240,9 @@ local function DetermineType(Value)
 	end
 end
 
-local NumberToBase64, Base64ToNumber = {}, {} do
+local NumberToBase64, Base64ToNumber = {}, {}
+
+do
 	local CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 	for Index = 1, 64 do
 		local Character = string.sub(CHARACTERS, Index, Index)
@@ -246,12 +252,16 @@ local NumberToBase64, Base64ToNumber = {}, {} do
 end
 
 -- Credit to Defaultio.
-local NumberToBase128, Base128ToNumber = {}, {} do
-	local CHARACTERS = ""
-	for Index = 0, 127 do CHARACTERS = CHARACTERS .. string.char(Index) end
+local NumberToBase128, Base128ToNumber = {}, {}
+
+do
+	local Base128Characters = ""
+	for Index = 0, 127 do
+		Base128Characters = Base128Characters .. string.char(Index)
+	end
 
 	for Index = 1, 128 do
-		local Character = string.sub(CHARACTERS, Index, Index)
+		local Character = string.sub(Base128Characters, Index, Index)
 		NumberToBase128[Index - 1] = Character
 		Base128ToNumber[Character] = Index - 1
 	end
@@ -265,9 +275,13 @@ local PowerOfTwo = setmetatable({}, {
 	end;
 })
 
-for Index = 0, 128 do local Value = PowerOfTwo[Index] Value = nil end
+for Index = 0, 128 do
+	local _ = PowerOfTwo[Index]
+end
 
-local BrickColorToNumber, NumberToBrickColor = {}, {} do
+local BrickColorToNumber, NumberToBrickColor = {}, {}
+
+do
 	for Index = 0, 63 do
 		local Color = BrickColor.palette(Index)
 		BrickColorToNumber[Color.Number] = Index
@@ -316,13 +330,12 @@ function BitBuffer:FromString(String)
 	local BitPointerValue = 0
 
 	for Index = 1, #String do
-		local ByteCharacter = string.byte(string.sub(String, Index, Index))
+		local ByteCharacter = string.byte(String, Index, Index)
 		for _ = 1, 8 do
 			BitPointerValue = BitPointerValue + 1
 			self.BitPointer = BitPointerValue
 			self.mBitBuffer[BitPointerValue] = ByteCharacter % 2
-			ByteCharacter = ByteCharacter / 2
-			ByteCharacter = ByteCharacter - ByteCharacter % 1
+			ByteCharacter = math.floor(ByteCharacter / 2)
 		end
 	end
 
@@ -368,15 +381,15 @@ function BitBuffer:FromBase64(String)
 	for Index = 1, #String do
 		local Character = string.sub(String, Index, Index)
 		local ByteCharacter = Base64ToNumber[Character]
-		if not ByteCharacter then error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 2) end
+		if not ByteCharacter then
+			error("Bad character: 0x" .. ToBase(string.byte(Character), 16), 2)
+		end
 
 		for _ = 1, 6 do
 			BitPointerValue = BitPointerValue + 1
 			self.BitPointer = BitPointerValue
 			self.mBitBuffer[BitPointerValue] = ByteCharacter % 2
-
-			ByteCharacter = ByteCharacter / 2
-			ByteCharacter = ByteCharacter - ByteCharacter % 1
+			ByteCharacter = math.floor(ByteCharacter / 2)
 		end
 
 		if ByteCharacter ~= 0 then
@@ -436,8 +449,7 @@ function BitBuffer:FromBase128(String)
 			BitPointerValue = BitPointerValue + 1
 			self.BitPointer = BitPointerValue
 			self.mBitBuffer[BitPointerValue] = ByteCharacter % 2
-			ByteCharacter = ByteCharacter / 2
-			ByteCharacter = ByteCharacter - ByteCharacter % 1
+			ByteCharacter = math.floor(ByteCharacter / 2)
 		end
 
 		if ByteCharacter ~= 0 then
@@ -525,8 +537,7 @@ function BitBuffer:WriteUnsigned(Width, Value)
 	for _ = 1, Width do
 		self.BitPointer = self.BitPointer + 1
 		self.mBitBuffer[self.BitPointer] = Value % 2
-		Value = Value / 2
-		Value = Value - Value % 1
+		Value = math.floor(Value / 2)
 	end
 
 	if Value ~= 0 then
@@ -541,7 +552,10 @@ end
 **--]]
 function BitBuffer:ReadUnsigned(Width)
 	local Value = 0
-	for Index = 1, Width do Value = Value + self:_ReadBit() * PowerOfTwo[Index - 1] end
+	for Index = 1, Width do
+		Value = Value + self:_ReadBit() * PowerOfTwo[Index - 1]
+	end
+
 	return Value
 end
 
@@ -552,8 +566,13 @@ end
 	@returns [void]
 **--]]
 function BitBuffer:WriteSigned(Width, Value)
-	if not (Width and Value) then error("bad arguments in BitBuffer::WriteSigned (missing values)", 2) end
-	if Value % 1 ~= 0 then error("Non-integer value to BitBuffer::WriteSigned", 2) end
+	if not (Width and Value) then
+		error("bad arguments in BitBuffer::WriteSigned (missing values)", 2)
+	end
+
+	if Value % 1 ~= 0 then
+		error("Non-integer value to BitBuffer::WriteSigned", 2)
+	end
 
 	-- Write sign
 	if Value < 0 then
@@ -592,7 +611,7 @@ function BitBuffer:WriteString(String)
 	local StringLength = #String
 	local BitWidth = 7
 	for Index = 1, StringLength do
-		if string.byte(string.sub(String, Index, Index)) > 127 then
+		if string.byte(String, Index, Index) > 127 then
 			BitWidth = 8
 			break
 		end
@@ -604,7 +623,7 @@ function BitBuffer:WriteString(String)
 	-- Now write out the string, terminated with "0x10, 0b0"
 	-- 0x10 is encoded as "0x10, 0b1"
 	for Index = 1, StringLength do
-		local ByteCharacter = string.byte(string.sub(String, Index, Index))
+		local ByteCharacter = string.byte(String, Index, Index)
 		if ByteCharacter == 0x10 then
 			self:WriteUnsigned(BitWidth, 0x10)
 			self:WriteUnsigned(1, 1)
@@ -680,7 +699,9 @@ BitBuffer.ReadBoolean = BitBuffer.ReadBool
 	@returns [void]
 **--]]
 function BitBuffer:WriteFloat(Fraction, WriteExponent, Float)
-	if not (Fraction and WriteExponent and Float) then error("missing argument(s)", 2) end
+	if not (Fraction and WriteExponent and Float) then
+		error("missing argument(s)", 2)
+	end
 
 	-- Sign
 	local Sign = 1
@@ -703,7 +724,7 @@ function BitBuffer:WriteFloat(Fraction, WriteExponent, Float)
 
 	-- Write mantissa
 	Mantissa = Mantissa + 0.5
-	Mantissa = Mantissa - Mantissa % 1 -- Not really correct, should round up/down based on the parity of |wexp|
+	Mantissa = math.floor(Mantissa) -- Not really correct, should round up/down based on the parity of |wexp|
 	self:WriteUnsigned(Fraction, Mantissa)
 
 	-- Write exponent
@@ -718,12 +739,16 @@ end
 	@returns [t:number] The float.
 **--]]
 function BitBuffer:ReadFloat(Fraction, WriteExponent)
-	if not (Fraction and WriteExponent) then error("missing argument(s)", 2) end
+	if not (Fraction and WriteExponent) then
+		error("missing argument(s)", 2)
+	end
 
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(Fraction)
 	local Exponent = self:ReadSigned(WriteExponent)
-	if Exponent == 0 and Mantissa == 0 then return 0 end
+	if Exponent == 0 and Mantissa == 0 then
+		return 0
+	end
 
 	Mantissa = Mantissa / PowerOfTwo[Fraction] / 2 + 0.5
 	return Sign * math.ldexp(Mantissa, Exponent)
@@ -746,7 +771,9 @@ function BitBuffer:ReadFloat8()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(3)
 	local Exponent = self:ReadSigned(4)
-	if Exponent == 0 and Mantissa == 0 then return 0 end
+	if Exponent == 0 and Mantissa == 0 then
+		return 0
+	end
 
 	Mantissa = Mantissa / PowerOfTwo[3] / 2 + 0.5
 	return Sign * math.ldexp(Mantissa, Exponent)
@@ -769,7 +796,9 @@ function BitBuffer:ReadFloat16()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(10)
 	local Exponent = self:ReadSigned(5)
-	if Exponent == 0 and Mantissa == 0 then return 0 end
+	if Exponent == 0 and Mantissa == 0 then
+		return 0
+	end
 
 	Mantissa = Mantissa / PowerOfTwo[10] / 2 + 0.5
 	return Sign * math.ldexp(Mantissa, Exponent)
@@ -792,7 +821,9 @@ function BitBuffer:ReadFloat32()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(23)
 	local Exponent = self:ReadSigned(8)
-	if Exponent == 0 and Mantissa == 0 then return 0 end
+	if Exponent == 0 and Mantissa == 0 then
+		return 0
+	end
 
 	Mantissa = Mantissa / PowerOfTwo[23] / 2 + 0.5
 	return Sign * math.ldexp(Mantissa, Exponent)
@@ -815,7 +846,9 @@ function BitBuffer:ReadFloat64()
 	local Sign = self:ReadUnsigned(1) == 1 and -1 or 1
 	local Mantissa = self:ReadUnsigned(52)
 	local Exponent = self:ReadSigned(11)
-	if Exponent == 0 and Mantissa == 0 then return 0 end
+	if Exponent == 0 and Mantissa == 0 then
+		return 0
+	end
 
 	Mantissa = Mantissa / PowerOfTwo[52] / 2 + 0.5
 	return Sign * math.ldexp(Mantissa, Exponent)
@@ -890,14 +923,9 @@ function BitBuffer:WriteRotation(CoordinateFrame)
 	local _, _, Roll = (WithoutRoll:Inverse() * CoordinateFrame):ToEulerAnglesXYZ()
 
 	-- Atan2 -> in the range [-pi, pi]
-	Azumith = ((Azumith / 3.1415926535898) * 2097151) + 0.5
-	Azumith = Azumith - Azumith % 1
-
-	Roll = ((Roll / 3.1415926535898) * 1048575) + 0.5
-	Roll = Roll - Roll % 1
-
-	Elevation = ((Elevation / 1.5707963267949) * 1048575) + 0.5
-	Elevation = Elevation - Elevation % 1
+	Azumith = math.floor(((Azumith / 3.1415926535898) * 2097151) + 0.5)
+	Roll = math.floor(((Roll / 3.1415926535898) * 1048575) + 0.5)
+	Elevation = math.floor(((Elevation / 1.5707963267949) * 1048575) + 0.5)
 
 	self:WriteSigned(22, Azumith)
 	self:WriteSigned(21, Roll)
@@ -936,9 +964,9 @@ function BitBuffer:WriteColor3(Color)
 
 	local R, G, B = Color.R * 255, Color.G * 255, Color.B * 255
 
-	self:WriteUnsigned(8, R - R % 1)
-	self:WriteUnsigned(8, G - G % 1)
-	self:WriteUnsigned(8, B - B % 1)
+	self:WriteUnsigned(8, math.floor(R))
+	self:WriteUnsigned(8, math.floor(G))
+	self:WriteUnsigned(8, math.floor(B))
 end
 
 --[[**
@@ -1127,7 +1155,7 @@ function BitBuffer.BitsNeeded(Number)
 	end
 
 	local Bits = math.log10(Number + 1) / LOG_10_OF_2
-	return Bits + (1 - Bits % 1) -- Equivalent to ceil
+	return math.ceil(Bits)
 end
 
 -- Lower camel case support!
