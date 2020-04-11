@@ -1029,9 +1029,7 @@ function BitBuffer:ReadCFrame()
 	Roll = 3.1415926535898 * (Roll / 1048575)
 	Elevation = 3.1415926535898 * (Elevation / 1048575)
 
-	local Rotation = CFrame.Angles(0, Azumith, 0)
-	Rotation = Rotation * CFrame.Angles(Elevation, 0, 0)
-	Rotation = Rotation * CFrame.Angles(0, 0, Roll)
+	local Rotation = CFrame.fromOrientation(Elevation, Azumith, Roll)
 
 	return Position * Rotation
 end
