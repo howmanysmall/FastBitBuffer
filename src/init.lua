@@ -194,7 +194,6 @@ local BitBuffer = {
 BitBuffer.__index = BitBuffer
 
 local CHAR_0X10 = string.char(0x10)
-local LOG_10_OF_2 = math.log10(2)
 local DEPRECATED_WARNING = true
 local DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -1152,7 +1151,7 @@ function BitBuffer.BitsNeeded(Number)
 		error(string.format("bad argument #1 in BitBuffer.BitsNeeded (number expected, instead got %s)", typeof(Number)), 2)
 	end
 
-	local Bits = math.log10(Number + 1) / LOG_10_OF_2
+	local Bits = math.log(Number + 1, 2)
 	return math.ceil(Bits)
 end
 
